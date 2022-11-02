@@ -43,12 +43,12 @@ def edc_read_journal(journals):
         for journal in journals:
             syslog.debug(f"\nReading journal: {journal}")
             with open(journal, "rt") as journalfile:
-                yield dict(
-                    event='Journal',
-                    timestamp=datetime.datetime.utcnow().isoformat(),
-                    filename=f"{ntpath.basename(journal)}"
+                # yield dict(
+                #     event='Journal',
+                #     timestamp=datetime.datetime.utcnow().isoformat(),
+                #     filename=f"{ntpath.basename(journal)}"
 
-                )
+                # )
                 while True:# not shutdown_seen:
                     line = journalfile.readline()
                     if not line:
@@ -59,8 +59,13 @@ def edc_read_journal(journals):
 
                     if len(line) < 5:
                         continue
+                    try:
 
-                    event = json.loads(line)
+                        event = json.loads(line)
+                    except json.decoder.JSONDecodeError as JX:
+                        print(JX)
+                        print(line)
+                        return
 
                     if event.get('event', '') == 'Shutdown':
                         syslog.debug(f"SHUTDOWN {event.get('timestamp'):22} {journal}")

@@ -1,5 +1,9 @@
 import sys
 import os
+import statistics
+from functools import reduce
+import numpy as np
+import pandas as pd
 
 from playsound import playsound
 
@@ -71,8 +75,14 @@ my_materials = {}
 missions = {}
 completed = {}
 signals = {}
+saascan = {}
+fuel_used = []
+fuel_level = []
+fuel_capacity = 0
 
 def follow_journal():
+    starpos = np.asarray([0,0,0])
+    navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(logpath)}
     jumptimes = []
     system_name = ''
     system_factions = []
@@ -81,19 +91,24 @@ def follow_journal():
     jumpdistance = 10
     mission_advice = ""
 
-    for event in edc_track_journal(logpath, backlog=3):
+    for event in edc_track_journal(logpath, backlog=0):
         timestamp = make_datetime(event.pop("timestamp"))
         eventname = event.pop("event")
 
         if not jumptimes:
             entrytime=timestamp.timestamp()
             jumptimes.append(timestamp.timestamp())
-        if not system_name and eventname == 'Location':
+        if eventname == 'Location' or eventname == 'FSDJump':
             system_name = event.get('StarSystem')
+            if system_name in navi_route:
+                navi_route.pop(system_name)
+
+        starpos = np.asarray(event.get('StarPos', starpos))
 
         sys.stdout.write(
             f"\r{str(timestamp)[:-6]:20} "+
-            f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:12} | {system_name:18} | ")
+            f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} | ")
+
         if eventname == 'Journal':
             sys.stdout.write(f"{event.get('filename')}\n")
         elif eventname == 'Fileheader':
@@ -102,30 +117,66 @@ def follow_journal():
         elif eventname == 'FSDJump':
             entrytime=timestamp.timestamp()
             body_id = event.get('BodyID')
-            system_name = event.get('StarSystem','')
+
+            if system_name in navi_route:
+                navi_system = navi_route.pop(system_name)
+            else:
+                navi_system = {}
+
             jumptimes.append(entrytime)
+            fuel_used.append(event.get('FuelUsed'))
+            fuel_level.append(event.get('FuelLevel'))
+
             if mission_advice and not [True for item in navroute.edc_navigationroute(logpath) if item.get('StarSystem') == mission_advice]:
                 mnames = ', '.join([m.get('LocalisedName', '') for i,m in missions.items() if mission_advice==m.get('DestinationSystem') ])
                 sys.stdout.write(f"Travel to {mission_advice} for \"{mnames}\"\n")
                 continue
             system_factions = [f.get('Name','') for f in sorted(event.get('Factions',[{}]),key=lambda X: -X.get('Influence',0))]
             if len(system_factions) > 1:
-                sys.stdout.write(f"Faction: {system_factions[0]}")
+                sys.stdout.write(f"Faction: {system_factions[0]:32}\n")
+                continue
 
+            navi_fuel = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items() if i.get('StarClass') in 'KGBFOAM'}
+            if navi_fuel:
+                fuel_system = reduce(
+                    lambda total, item:item if navi_fuel[item] < navi_fuel[total] else total,
+                    list(navi_fuel)
+                )
+                fuel_ratio = round(100*fuel_level[-1] / fuel_capacity,1)
+                est_jumps = round(fuel_level[-1] / (.1+statistics.mean(fuel_used)),1)
+                sys.stdout.write(f"star {navi_system.get('StarClass','')}, fuel {fuel_ratio}% -> {est_jumps} jumps, fuelstar {fuel_system} at {round(navi_fuel[fuel_system],1)} ly") # FuelCapacity
+                if est_jumps < 3:
+                    playsound('./sound88.wav')
 
             sys.stdout.write(f"\n")
             #sys.stdout.write(f"{system_name:22}\n")
             continue
 
+        elif "NavRoute" in eventname:
+            navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(logpath)}
+            navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
+
+
         elif eventname == 'LoadGame':
             entrytime=timestamp.timestamp()
             jumptimes.append(entrytime)
+            fuel_level.append(event.get('FuelLevel'))
+            fuel_capacity = event.get('FuelCapacity')
             #sys.stdout.write(f"\n")
 
         elif eventname == 'StartJump' and event.get("JumpType") == "Hyperspace":
-            system_name = event.get('StarSystem','')
-            sys.stdout.write(f"{system_name:22}\n")
-            continue
+            if system_name in navi_route:
+                navi_route.pop(system_name)
+            sys.stdout.write(f"{event.get('StarSystem',''):25} | class {event.get('StarClass','')}\n") # FuelCapacity
+
+        elif eventname == 'FSDTarget':
+            sys.stdout.write(f"{event.get('Name',''):25} | class {event.get('StarClass','')}, {event.get('RemainingJumpsInRoute','')} jumps remaining.\n")
+
+        elif eventname == 'FuelScoop':
+            fuel_level.append(event.get('Total'))
+            fuel_ratio = round(100*event.get('Total') / fuel_capacity,1)
+            est_jumps = round(fuel_level[-1] / (.1+statistics.mean(fuel_used)),1)
+            sys.stdout.write(f"{fuel_ratio:3}% -> {est_jumps} jumps \n") # FuelCapacity
 
         elif eventname == 'Scan' and event.get('BodyID') == body_id:
             sys.stdout.write(f"Class {event.get('StarType')}{event.get('Subclass')}")
@@ -133,7 +184,7 @@ def follow_journal():
                 sys.stdout.write(f"\t{'Undiscovered'}\n")
                 playsound('./sound88.wav')
             else:
-                sys.stdout.write(f"\t{'Previously Discovered'}\n")
+                sys.stdout.write(f"\t{'Was Discovered'}\n")
 
             continue
 
@@ -143,6 +194,10 @@ def follow_journal():
                 if signal not in signals:
                     signals[signal] = set()
                 signals.get(signal).add((system_name,system_factions[0] if system_factions else '-'))
+        elif 'SAAScanComplete' == eventname:
+            if system_name not in saascan:
+                saascan[system_name] = {}
+            saascan[system_name][event.get('BodyName')] = event
 
         elif 'scan' in eventname.lower():
             if not event.get("WasDiscovered", True):
@@ -151,15 +206,18 @@ def follow_journal():
                     event.get("WasMapped"),{}).get(
                     bool(event.get('TerraformState') == 'Terraformable'),{}).get(
                     event.get("PlanetClass"),0) > 0:
-
-                    sys.stdout.write(f"{event.get('BodyName').replace(system_name,'')} {event.get('PlanetClass')} {event.get('TerraformState')}\n")
-
-            if False and "Resource" in json.dumps(event):
-                print(eventname, event)
-                break
-
+                    saas = saascan.get(system_name,{}).get(event.get('BodyName'),{})
+                    sys.stdout.write(f"{event.get('BodyName').replace(system_name,'').strip()} {event.get('PlanetClass')} {event.get('TerraformState')} ")
+                    if saas:
+                        sys.stdout.write(f"{saas.get('ProbesUsed')}/{saas.get('EfficiencyTarget')} probes ")
+                    sys.stdout.write('\n')
 
 
+
+            continue
+
+        elif 'Screenshot' in eventname:
+            sys.stdout.write(f"{event.get('Body')} {event.get('Filename')}\n")
             continue
 
         elif 'Interdict' in eventname:

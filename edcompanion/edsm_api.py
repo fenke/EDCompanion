@@ -6,17 +6,21 @@ from functools import lru_cache
 import requests
 import numpy as np
 
-@lru_cache(32)
-def get_edsm_info(systemname):
+@lru_cache(128)
+def get_edsm_info(systemname, verbose=True):
     if not systemname:
         return {}
     req = requests.get(
-        'https://www.edsm.net/api-v1/system',
+        'https://www.edsm.net/api-system-v1/bodies' if verbose else 'https://www.edsm.net/api-v1/system',
         params=dict(
             systemName=systemname,
             showCoordinates=1)
         )
-    return req.json() if req.status_code == 200 else {}
+    if req.status_code == 200:
+        record = req.json()
+        return record if record else {}
+    else:
+        return {}
 
 @lru_cache(128)
 def distance_between_systems(s1name,s2name):

@@ -9,6 +9,7 @@ import json
 import logging
 import datetime
 import ntpath
+from functools import reduce
 
 
 def loads_jsonline(line):
@@ -25,9 +26,18 @@ def edc_track_journal(journalpath, backlog=0):
             [os.path.join(journalpath, f) for f in os.listdir(journalpath) if 'Journal' in f.split('.')[0] and '.log' in f],
             key=lambda f:f.replace('-', '').replace('Journal.20', 'Journal.').replace('T','')
         )
-        backlog = min(backlog, len(logfiles)-1)
-        current_journal = logfiles[-(1+backlog):]
-        return edc_read_journal(current_journal)
+
+        if isinstance(backlog, int):
+            backlog = min(backlog, len(logfiles)-1)
+            syslog.info(f"Reading journals, backlog = {backlog}")
+            return edc_read_journal(logfiles[-(1+backlog):])
+        elif isinstance(backlog, str):
+            syslog.info(f"Reading journals, backlog = {backlog}")
+            return edc_read_journal(reduce(
+                lambda t, j: t if not t and backlog not in j else t + [j],
+                logfiles, []
+            )[1:])
+
 
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
@@ -39,9 +49,10 @@ def edc_read_journal(journals):
     if not isinstance(journals, list):
         return edc_read_journal([journals])
     last_journal = journals[-1]
+    journal = journals[0]
     try:
         for journal in journals:
-            syslog.debug(f"\nReading journal: {journal}")
+            syslog.info(f"\nReading journal: {journal}")
             with open(journal, "rt") as journalfile:
                 # yield dict(
                 #     event='Journal',
@@ -72,7 +83,17 @@ def edc_read_journal(journals):
                         break
 
                     yield event
+        yield dict(
+            event='JournalFinished',
+            timestamp=datetime.datetime.utcnow().isoformat(),
+            filename=f"{ntpath.basename(journal)}"
+        )
+
 
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt")
-        pass
+        yield dict(
+            event='KeyboardInterrupt',
+            timestamp=datetime.datetime.utcnow().isoformat(),
+            filename=f"{ntpath.basename(journal)}"
+        )

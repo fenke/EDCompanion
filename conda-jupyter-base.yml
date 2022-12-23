@@ -1,0 +1,23 @@
+name: jupyter-base
+channels:
+    - default
+    - conda-forge
+dependencies:
+    - python=3.8
+    - requests
+    - dnspython
+    - scikit-learn
+    - numpy
+    - scipy
+    - matplotlib
+    - pandas
+    - pweave
+    - spyder
+    - jupyter
+    - ipywidgets
+    - jupyterlab
+    - jupyter_contrib_nbextensions
+    - jupyterlab-git
+    - asyncpg
+    - aiohttp
+

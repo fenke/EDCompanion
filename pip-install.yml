@@ -1,0 +1,7 @@
+  channels:
+
+  dependencies:
+  - pip:
+      - lttb
+  imports:
+  - conda-jupyter-base 

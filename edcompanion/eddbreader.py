@@ -26,24 +26,18 @@ def edc_dbfilereader(filename, verbose=False):
     #try:
 
     with gzip.open(filename, 'rt') as jsonfile:
-        firstline = jsonfile.readline()
 
         while True:
             count += 1
             chunk = jsonfile.readlines(chunksize)
             if chunk:
                 for line in chunk:
-                    if len(firstline) < 5:
-                        firstline = line
-                        continue
-
                     if len(line) < 5:
-                        yield json.loads(firstline)
-                    else:
-                        yield json.loads(firstline[0:-2])
+                        continue
+                    
+                    yield json.loads(line.rstrip(',\r\n'))
 
                     system_count += 1
-                    firstline = line
 
                 sys.stdout.write(f"\r{count}/{est_count}\t{100*count/est_count:3.2f}%, {int(system_count / (time.process_time() - start)):6} /s, {system_count:9} systems, {((est_count - count) * (time.process_time() - start)/count):5.1f} seconds remaining")
 

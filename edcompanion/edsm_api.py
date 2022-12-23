@@ -6,7 +6,7 @@ from functools import lru_cache
 import requests
 import numpy as np
 
-@lru_cache(128)
+@lru_cache(512)
 def get_edsm_info(systemname, verbose=True):
     if not systemname:
         return {}
@@ -22,7 +22,7 @@ def get_edsm_info(systemname, verbose=True):
     else:
         return {}
 
-@lru_cache(128)
+@lru_cache(512)
 def distance_between_systems(s1name,s2name):
     s1 = get_edsm_info(s1name)
     s2 = get_edsm_info(s2name)

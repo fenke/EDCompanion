@@ -16,7 +16,7 @@ from edcompanion.timetools import make_datetime, make_naive_utc
 from edcompanion.edsm_api import get_edsm_info, distance_between_systems
 
 syslog = init_console_logging(__name__)
-logpath = "/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
+edlogspath = "/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
 
 planet_values = {
     False: { # was-not-discovered
@@ -118,7 +118,7 @@ def follow_journal(backlog=0, verbose=False):
             original_play_sound(*args, **kwargs)
             
     starpos = np.asarray([0,0,0])
-    navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(logpath)}
+    navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
     jumptimes = []
     system_name = ''
     systems = {}
@@ -133,7 +133,7 @@ def follow_journal(backlog=0, verbose=False):
     last_journal = ''
     while not kb_stop:
 
-        for event in edc_track_journal(logpath, backlog=backlog):
+        for event in edc_track_journal(edlogspath, backlog=backlog):
             timestamp = make_datetime(event.pop("timestamp"))
             eventname = event.pop("event")
 
@@ -191,7 +191,7 @@ def follow_journal(backlog=0, verbose=False):
                 fuel_level.append(event.get('FuelLevel'))
 
                 # handle mission updates
-                if mission_advice and not [True for item in navroute.edc_navigationroute(logpath) if item.get('StarSystem') == mission_advice]:
+                if mission_advice and not [True for item in navroute.edc_navigationroute(edlogspath) if item.get('StarSystem') == mission_advice]:
                     mnames = ', '.join([m.get('LocalisedName', '') for i,m in missions.items() if mission_advice==m.get('DestinationSystem') ])
                     sys.stdout.write(f"Travel to {mission_advice} for \"{mnames}\"\n")
                     continue
@@ -222,7 +222,7 @@ def follow_journal(backlog=0, verbose=False):
                 continue
 
             elif "NavRoute" in eventname:
-                navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(logpath)}
+                navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
                 navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
 
 

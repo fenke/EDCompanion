@@ -4,7 +4,22 @@
 
 from functools import lru_cache
 import requests
+import os
 import numpy as np
+
+def get_commander_position(commandername, token):
+    req = requests.get(
+        'https://www.edsm.net/api-logs-v1/get-position',
+        params=dict(
+            commanderName=commandername,
+            apiKey=token,
+            showCoordinates=1)
+        )
+    if req.status_code == 200:
+        record = req.json()
+        return record if record else {}
+    else:
+        return {}
 
 @lru_cache(512)
 def get_edsm_info(systemname, verbose=True):

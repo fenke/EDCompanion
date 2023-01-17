@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 import statistics
 from functools import reduce
 import numpy as np
@@ -116,7 +117,7 @@ def follow_journal(backlog=0, verbose=False):
     def playsound(*args, **kwargs):
         if verbose:
             original_play_sound(*args, **kwargs)
-            
+
     starpos = np.asarray([0,0,0])
     navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
     jumptimes = []
@@ -137,6 +138,7 @@ def follow_journal(backlog=0, verbose=False):
             timestamp = make_datetime(event.pop("timestamp"))
             eventname = event.pop("event")
 
+            # general / state =============================================================
             if not jumptimes:
                 entrytime=timestamp.timestamp()
                 jumptimes.append(timestamp.timestamp())
@@ -156,12 +158,15 @@ def follow_journal(backlog=0, verbose=False):
                     )
                     system = systems[system_name]
 
+            # update state: system coordinates
             starpos = np.asarray(event.get('StarPos', starpos))
 
             sys.stdout.write(
                 f"\r{str(timestamp)[:-6]:20} "+
                 f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} | ")
 
+            #
+            # A big CASE ===========================================================
             if eventname == 'KeyboardInterrupt':
                 sys.stdout.write(f"Keyboard Interrupt {event.get('filename')}\n")
                 kb_stop = True
@@ -358,7 +363,10 @@ def follow_journal(backlog=0, verbose=False):
 
             elif eventname == 'StoredModules' :
                 #sys.stdout.write(f"{event.get('StationName',''):22}\n")
-                modules = event.get('Items',[{}])
+                modules = event.get('Items',[{}]).copy()
+                with open('modules.json', "wt") as jsonfile:
+                    json.dump(modules, jsonfile)
+
                 continue
 
             elif ('Loadout' == eventname ):
@@ -366,6 +374,17 @@ def follow_journal(backlog=0, verbose=False):
                 current_ship = ships[event.get('ShipID')]
                 jumpdistance = round(event.get('MaxJumpRange', 10),1)
                 sys.stdout.write(f"{event.get('Ship',''):15} {event.get('ShipIdent',''):6} {event.get('MaxJumpRange',''):5,.1F} ly\n")
+                all_ships = {}
+                try:
+                    with open('ships.json', "rt") as jsonfile:
+                        all_ships = json.load(jsonfile)
+                    all_ships.update(ships)
+                except Exception as x:
+                    pass
+                finally:
+                    with open('ships.json', "wt") as jsonfile:
+                        json.dump(all_ships, jsonfile)
+
                 continue
 
             elif (eventname == 'Rank' or eventname == 'Progress'):

@@ -53,7 +53,7 @@ def edc_read_journal(journals):
     try:
         for journal in journals:
             syslog.info(f"\nReading journal: {journal}")
-            with open(journal, "rt") as journalfile:
+            with open(journal, encoding="utf-8") as journalfile:
                 # yield dict(
                 #     event='Journal',
                 #     timestamp=datetime.datetime.utcnow().isoformat(),

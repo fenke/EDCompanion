@@ -154,3 +154,5 @@ cython_debug/
 data
 modules.json
 ships.json
+collected_navsystems.json
+collected_neutron_systems.json

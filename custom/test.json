@@ -9,6 +9,20 @@
       },
       {
          "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 243\nSystem Name         : NGC 3199 SECTOR DL-Y D12\nx                   : 14563.875\ny                   : -302.53125\nz                   : 3509.9375\nPrimary Star        : A (Blue-White) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 852\nDiscovered By       : Baton",
+         "x": 14563.875,
+         "y": -302.53125,
+         "z": 3509.9375
+      },
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 244\nSystem Name         : NGC 3199 SECTOR DL-Y D12\nx                   : 14563.875\ny                   : -302.53125\nz                   : 3509.9375\nPrimary Star        : A (Blue-White) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 852\nDiscovered By       : Baton",
+         "x": 14563.875,
+         "y": -302.53125,
+         "z": 3509.9375
+      },
+      {
+         "pin": "red",
          "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
          "x": 573.59375,
          "y": -339.46875,

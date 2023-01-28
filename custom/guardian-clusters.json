@@ -1,0 +1,102 @@
+{
+   "markers": [
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 1\nSystem Name         : SYNUEFE XR-H D11-102\nx                   : 357.34375\ny                   : -49.34375\nz                   : -74.75\nPrimary Star        : F (White) Star\nBody Name           :  1 B\nBody Sub Type       : Rocky body\nDistance To Arrival : 797\nDiscovered By       : MauserPT7",
+         "x": 357.34375,
+         "y": -49.34375,
+         "z": -74.75
+      },
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 207\nSystem Name         : COL 173 SECTOR KT-G B40-2\nx                   : 1172.03125\ny                   : -221.34375\nz                   : 167.28125\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  A 3\nBody Sub Type       : High metal content world\nDistance To Arrival : 24\nDiscovered By       : zzz_Unknown",
+         "x": 1172.03125,
+         "y": -221.34375,
+         "z": 167.28125
+      },
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 276\nSystem Name         : COL 173 SECTOR YF-N C7-5\nx                   : 1073.21875\ny                   : -392.25\nz                   : -378.3125\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  B 3\nBody Sub Type       : High metal content world\nDistance To Arrival : 2154\nDiscovered By       : Marcus Seldon",
+         "x": 1073.21875,
+         "y": -392.25,
+         "z": -378.3125
+      },
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 322\nSystem Name         : COL 132 SECTOR GS-K D8-33\nx                   : 1111.5\ny                   : -379.75\nz                   : -418.3125\nPrimary Star        : G (White-Yellow) Star\nBody Name           :  D 4\nBody Sub Type       : High metal content world\nDistance To Arrival : 136796\nDiscovered By       : Dreamstate",
+         "x": 1111.5,
+         "y": -379.75,
+         "z": -418.3125
+      },
+      {
+         "pin": "red",
+         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
+         "x": 573.59375,
+         "y": -339.46875,
+         "z": -1167.65625
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 0 with 233 guardian sites",
+         "x": 883.7,
+         "y": -132.65,
+         "z": -118.41
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 1 with 5 guardian sites",
+         "x": -5507.89,
+         "y": -539.22,
+         "z": 10514.41
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 2 with 9 guardian sites",
+         "x": 8653.54,
+         "y": -151.87,
+         "z": 2684.02
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 3 with 6 guardian sites",
+         "x": -9321.18,
+         "y": -403.1,
+         "z": 7951.34
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 4 with 3 guardian sites",
+         "x": 4950.75,
+         "y": 162.56,
+         "z": 20643.94
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 5 with 4 guardian sites",
+         "x": 1254.95,
+         "y": -724.91,
+         "z": 12311.71
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 6 with 6 guardian sites",
+         "x": 14590.04,
+         "y": -254.41,
+         "z": 3530.29
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 7 with 4 guardian sites",
+         "x": 1517.59,
+         "y": -217.06,
+         "z": 32.47
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 8 with 3 guardian sites",
+         "x": -768.97,
+         "y": -618.11,
+         "z": 13436.83
+      }
+   ]
+}

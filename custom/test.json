@@ -1,0 +1,18 @@
+{
+   "markers": [
+      {
+         "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 1\nSystem Name         : SYNUEFE XR-H D11-102\nx                   : 357.34375\ny                   : -49.34375\nz                   : -74.75\nPrimary Star        : F (White) Star\nBody Name           :  1 B\nBody Sub Type       : Rocky body\nDistance To Arrival : 797\nDiscovered By       : MauserPT7",
+         "x": 357.34375,
+         "y": -49.34375,
+         "z": -74.75
+      },
+      {
+         "pin": "red",
+         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
+         "x": 573.59375,
+         "y": -339.46875,
+         "z": -1167.65625
+      }
+   ]
+}

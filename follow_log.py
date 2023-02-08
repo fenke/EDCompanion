@@ -119,6 +119,7 @@ def follow_journal(backlog=0, verbose=False):
             original_play_sound(*args, **kwargs)
 
     starpos = np.asarray([0,0,0])
+    guardian_system = False
     navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
     jumptimes = []
     system_name = ''
@@ -147,23 +148,40 @@ def follow_journal(backlog=0, verbose=False):
                 system_name = event.get('StarSystem')
                 if system_name in navi_route:
                     navi_route.pop(system_name)
+
                 if system_name not in systems:
                     systems[system_name] = dict(
                         StarPos=event.get('StarPos',[]),
-                        bodies={event.get('BodyID',0):dict(
-                            Body=event.get('Body'),
-                            BodyType=event.get('BodyType')
-                        )},
-                        stars=set([event.get('BodyID',0)] if event.get('BodyType','')== 'Star' else [])
+                        bodies={event.get('BodyID',0):dict(Body=event.get('Body'), BodyType=event.get('BodyType'))},
+                        stars=set([event.get('BodyID',0)]) if bool(event.get('BodyType','') == 'Star') else set([])
                     )
                     system = systems[system_name]
 
-            # update state: system coordinates
+                guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
+                if guardian_system:
+                    guardian_systems = {}
+                    try:
+                        with open('guardian_systems.json', "rt") as jsonfile:
+                            guardian_systems=json.load(jsonfile)
+                    except Exception as x:
+                        sys.stdout.write(f"Error {x}\n")
+
+                    guardian_systems.update({
+                        system_name: systems[system_name].get('StarPos',[])
+                    })
+                    try:
+                        with open('guardian_systems.json', "wt") as jsonfile:
+                            json.dump(guardian_systems, jsonfile)
+                    except Exception as x:
+                        sys.stdout.write(f"Error {x}\n")
+
+
+            # update state: system coordinates -----------------------------------------------
             starpos = np.asarray(event.get('StarPos', starpos))
 
             sys.stdout.write(
                 f"\r{str(timestamp)[:-6]:20} "+
-                f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} | ")
+                f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} {'>' if guardian_system else '|'} ")
 
             #
             # A big CASE ===========================================================
@@ -186,6 +204,7 @@ def follow_journal(backlog=0, verbose=False):
                 system["BodyID"] = body_id
                 system['stars'].add(body_id)
 
+
                 if system_name in navi_route:
                     navi_system = navi_route.pop(system_name)
                 else:
@@ -200,11 +219,17 @@ def follow_journal(backlog=0, verbose=False):
                     mnames = ', '.join([m.get('LocalisedName', '') for i,m in missions.items() if mission_advice==m.get('DestinationSystem') ])
                     sys.stdout.write(f"Travel to {mission_advice} for \"{mnames}\"\n")
                     continue
+                # "SystemAllegiance":"Guardian"
+
+                guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
+                if guardian_system:
+                    sys.stdout.write(f"Guardian System\t")
+                    playsound('./sound88.wav')
 
                 system_factions = [f.get('Name','') for f in sorted(event.get('Factions',[{}]),key=lambda X: -X.get('Influence',0))]
                 if len(system_factions) > 1:
-                    sys.stdout.write(f"Faction: {system_factions[0]:32}\n")
-                    continue
+                    sys.stdout.write(f"Faction: {system_factions[0]:32}")
+
                 # Fuel management assistance
                 navi_fuel = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items() if i.get('StarClass') in 'KGBFOAM'}
                 if navi_fuel:
@@ -289,6 +314,13 @@ def follow_journal(backlog=0, verbose=False):
 
                         sys.stdout.write('\n')
 
+            # SAASignalsFound
+            elif 'SAASignalsFound' == eventname:
+
+                if 'Guardian' in [S.get('Type_Localised') for S in event.get('Signals',[]) if S.get('Type_Localised')]:
+                    guardian_system = True
+                    sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n")
+
 
             elif 'FSSSignalDiscovered' == eventname:
                 signal = event.get("SignalName_Localised", None)
@@ -365,7 +397,7 @@ def follow_journal(backlog=0, verbose=False):
                 #sys.stdout.write(f"{event.get('StationName',''):22}\n")
                 modules = event.get('Items',[{}]).copy()
                 with open('modules.json', "wt") as jsonfile:
-                    json.dump(modules, jsonfile)
+                    json.dump(modules, jsonfile, indent=3)
 
                 continue
 
@@ -383,7 +415,7 @@ def follow_journal(backlog=0, verbose=False):
                     pass
                 finally:
                     with open('ships.json', "wt") as jsonfile:
-                        json.dump(all_ships, jsonfile)
+                        json.dump(all_ships, jsonfile, indent=3)
 
                 continue
 

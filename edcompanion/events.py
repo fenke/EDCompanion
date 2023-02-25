@@ -52,7 +52,7 @@ def edc_read_journal(journals):
     journal = journals[0]
     try:
         for journal in journals:
-            syslog.info(f"\nReading journal: {journal}")
+            syslog.debug(f"\nReading journal: {journal}")
             with open(journal, encoding="utf-8") as journalfile:
                 # yield dict(
                 #     event='Journal',

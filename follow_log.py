@@ -111,7 +111,7 @@ signals = {}
 saascan = {}
 fuel_used = []
 fuel_level = []
-fuel_capacity = 0
+fuel_capacity = 1
 
 def follow_journal(backlog=0, verbose=False):
     def playsound(*args, **kwargs):
@@ -230,19 +230,6 @@ def follow_journal(backlog=0, verbose=False):
                 if len(system_factions) > 1:
                     sys.stdout.write(f"Faction: {system_factions[0]:32}")
 
-                # Fuel management assistance
-                navi_fuel = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items() if i.get('StarClass') in 'KGBFOAM'}
-                if navi_fuel:
-                    fuel_system = reduce(
-                        lambda total, item:item if navi_fuel[item] < navi_fuel[total] else total,
-                        list(navi_fuel)
-                    )
-                    fuel_ratio = round(100*fuel_level[-1] / fuel_capacity,1)
-                    est_jumps = round(fuel_level[-1] / (.1+statistics.mean(fuel_used)),1)
-                    sys.stdout.write(f"fuel {fuel_ratio}% -> {est_jumps} jumps, fuelstar {fuel_system} at {round(navi_fuel[fuel_system],1)} ly")
-                    if est_jumps < 3:
-                        playsound('./sound88.wav')
-
                 # Points of interest
                 if system_name in edastro_poi:
                     sys.stdout.write(f"Poi: {edastro_poi[system_name].get('name')}\n{edastro_poi[system_name].get('type'):20} | {edastro_poi[system_name].get('summary')}\n")
@@ -260,7 +247,7 @@ def follow_journal(backlog=0, verbose=False):
                 entrytime=timestamp.timestamp()
                 jumptimes.append(entrytime)
                 fuel_level.append(event.get('FuelLevel'))
-                fuel_capacity = event.get('FuelCapacity')
+                fuel_capacity = max(event.get('FuelCapacity',1),1)
                 #sys.stdout.write(f"\n")
 
             elif eventname == 'StartJump' and event.get("JumpType") == "Hyperspace":
@@ -269,6 +256,19 @@ def follow_journal(backlog=0, verbose=False):
                 sys.stdout.write(f"{event.get('StarSystem',''):25} | class {event.get('StarClass','')}\n") # FuelCapacity
 
             elif eventname == 'FSDTarget':
+                # Fuel management assistance
+                navi_fuel = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items() if i.get('StarClass') in 'KGBFOAM'}
+                if navi_fuel:
+                    fuel_system = reduce(
+                        lambda total, item:item if navi_fuel[item] < navi_fuel[total] else total,
+                        list(navi_fuel)
+                    )
+                    fuel_ratio = round(100*fuel_level[-1] / fuel_capacity,1)
+                    est_jumps = round(fuel_level[-1] / (.1+(statistics.mean(fuel_used) if fuel_used else 3)),1)
+                    sys.stdout.write(f"fuel {fuel_ratio}% -> {est_jumps} jumps, fuelstar at {round(navi_fuel[fuel_system],1)} ly ")
+                    if est_jumps < 3:
+                        playsound('./sound88.wav')
+
                 sys.stdout.write(f"{event.get('Name',''):25} | class {event.get('StarClass','')}, {event.get('RemainingJumpsInRoute','')} jumps remaining.\n")
 
             elif eventname == 'FuelScoop':
@@ -339,7 +339,14 @@ def follow_journal(backlog=0, verbose=False):
                 continue
 
             elif 'Interdict' in eventname:
-                sys.stdout.write(f"{event.get('Interdictor'):22}\n")
+                sys.stdout.write(f"{event.get('Interdictor', '??'):22}\n")
+                continue
+            
+            elif eventname == 'Music': # "event":"Music", "MusicTrack":"Combat_Unknown"
+                sys.stdout.write(f"{event.get('MusicTrack'):22}")
+                if event.get('MusicTrack') == 'Combat_Unknown':
+                    sys.stdout.write(f"Uh-oh\n")
+                    playsound('./sound88.wav')
                 continue
 
             elif 'Mission' in eventname:
@@ -427,6 +434,8 @@ def follow_journal(backlog=0, verbose=False):
                 my_materials = {T:{I.get("Name"):I.get("Count") for I in event.get(T,[])} for T in ['Raw','Encoded','Manufactured']}
                 #my_materials = {I.get("Name_Localised", I.get("Name")):I.get("Count") for I in item.get('Raw',[]) + item.get("Encoded",[])}
                 continue
+                
+        sys.stdout.write(f"\nBye bye\n")
 
     return systems, system_name
 

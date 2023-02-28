@@ -37,17 +37,17 @@ def get_edsm_info(systemname, verbose=True):
     else:
         return {}
 
-    
+
 @lru_cache(512)
 def distance_between_systems(s1name,s2name):
-    s1 = get_edsm_info(s1name)
-    s2 = get_edsm_info(s2name)
+    s1 = get_edsm_info(s1name, verbose=False)
+    s2 = get_edsm_info(s2name, verbose=False)
     c1 = np.asarray([s1.get('coords',dict(x=0,y=0,z=0)).get(k) for k in ['x', 'y', 'z']])
     c2 = np.asarray([s2.get('coords',dict(x=0,y=0,z=0)).get(k) for k in ['x', 'y', 'z']])
     return np.sqrt(np.sum(np.square(c1-c2)))
 
 def get_systems_in_cube(system, size=100):
-    base_url='https://www.edsm.net/api-v1/cube-systems'    
+    base_url='https://www.edsm.net/api-v1/cube-systems'
     if not system:
         return {}
     if isinstance(system, str):
@@ -58,11 +58,11 @@ def get_systems_in_cube(system, size=100):
         params=dict(
             x=system[0],
             y=system[1],
-            z=system[2], 
+            z=system[2],
             showCoordinates=1,
             showPrimaryStar=1,
             size=size
-        ) 
+        )
     )
     if req.status_code == 200:
         return req.json()
@@ -71,32 +71,32 @@ def get_systems_in_cube(system, size=100):
 
 @lru_cache(32)
 def get_systems_in_cube_by_name(system, size=100):
-    base_url='https://www.edsm.net/api-v1/cube-systems'    
+    base_url='https://www.edsm.net/api-v1/cube-systems'
     if not system:
         return {}
     req = requests.get(
         base_url,
         params=dict(
-            systemName=system, 
+            systemName=system,
             showCoordinates=1,
             showPrimaryStar=1,
             size=size
-        ) 
+        )
     )
     if req.status_code == 200:
         return req.json()
     else:
         return {}
-    
+
 @lru_cache(32)
 def get_systems_in_sphere(system, radius=100):
-    base_url='https://www.edsm.net/api-v1/sphere-systems'    
+    base_url='https://www.edsm.net/api-v1/sphere-systems'
     if not system:
         return {}
     req = requests.get(
         base_url,
         params=dict(
-            systemName=system, 
+            systemName=system,
             showCoordinates=1,
             showPrimaryStar=1,
             radius=radius

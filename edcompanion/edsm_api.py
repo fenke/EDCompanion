@@ -62,12 +62,11 @@ def get_edsm_system_risk(systemname):
                 if totaldeaths > 0:
                     weekdeaths = deathsrecord.get('week',0)
                     totaltraffic = trafficrecord.get('total', 0)
-                    return (weekdeaths*totaltraffic) / (weektraffic * totaldeaths) 
-                
-                else:
-                    return 0
-        
-    return np.nan
+                    return (weekdeaths*totaltraffic) / (weektraffic * totaldeaths) if weekdeaths > 0 else totaldeaths/totaltraffic
+                            
+        return 0
+    
+    return 0
 
     
 @lru_cache(512)

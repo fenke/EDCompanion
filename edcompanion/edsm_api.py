@@ -37,6 +37,38 @@ def get_edsm_info(systemname, verbose=True):
     else:
         return {}
 
+@lru_cache(64)
+def get_edsm_system_risk(systemname):
+    if not systemname:
+        return {}
+    traffic = requests.get(
+        'https://www.edsm.net/api-system-v1/traffic',
+        params=dict(systemName=systemname)
+    )
+
+    if traffic.status_code == 200:
+        trafficrecord = traffic.json().get('traffic',{})
+        weektraffic = trafficrecord.get('week', 0)
+        if weektraffic > 0:
+            deaths = requests.get(
+                'https://www.edsm.net/api-system-v1/deaths',
+                params=dict(systemName=systemname)
+            )
+
+            if deaths.status_code == 200:
+                deathsrecord = deaths.json().get('deaths',{})
+
+                totaldeaths = deathsrecord.get('total',0)
+                if totaldeaths > 0:
+                    weekdeaths = deathsrecord.get('week',0)
+                    totaltraffic = trafficrecord.get('total', 0)
+                    return (weekdeaths*totaltraffic) / (weektraffic * totaldeaths)
+
+                else:
+                    return 0
+
+    return np.nan
+
 
 @lru_cache(512)
 def distance_between_systems(s1name,s2name):

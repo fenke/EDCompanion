@@ -9,27 +9,6 @@
       },
       {
          "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 207\nSystem Name         : COL 173 SECTOR KT-G B40-2\nx                   : 1172.03125\ny                   : -221.34375\nz                   : 167.28125\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  A 3\nBody Sub Type       : High metal content world\nDistance To Arrival : 24\nDiscovered By       : zzz_Unknown",
-         "x": 1172.03125,
-         "y": -221.34375,
-         "z": 167.28125
-      },
-      {
-         "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 276\nSystem Name         : COL 173 SECTOR YF-N C7-5\nx                   : 1073.21875\ny                   : -392.25\nz                   : -378.3125\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  B 3\nBody Sub Type       : High metal content world\nDistance To Arrival : 2154\nDiscovered By       : Marcus Seldon",
-         "x": 1073.21875,
-         "y": -392.25,
-         "z": -378.3125
-      },
-      {
-         "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 322\nSystem Name         : COL 132 SECTOR GS-K D8-33\nx                   : 1111.5\ny                   : -379.75\nz                   : -418.3125\nPrimary Star        : G (White-Yellow) Star\nBody Name           :  D 4\nBody Sub Type       : High metal content world\nDistance To Arrival : 136796\nDiscovered By       : Dreamstate",
-         "x": 1111.5,
-         "y": -379.75,
-         "z": -418.3125
-      },
-      {
-         "pin": "red",
          "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
          "x": 573.59375,
          "y": -339.46875,
@@ -37,66 +16,80 @@
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 0 with 233 guardian sites",
-         "x": 883.7,
-         "y": -132.65,
-         "z": -118.41
+         "text": "Center of cluster nr. 0 near VELA DARK REGION EG-X B1-1\nwith 434 guardian sites",
+         "x": 944.39,
+         "y": -138.87,
+         "z": -123.32
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 1 with 5 guardian sites",
-         "x": -5507.89,
-         "y": -539.22,
-         "z": 10514.41
+         "text": "Center of cluster nr. 1 near PRUA PHOE TS-B D252\nwith 21 guardian sites",
+         "x": -5508.69,
+         "y": -540.86,
+         "z": 10520.3
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 2 with 9 guardian sites",
-         "x": 8653.54,
-         "y": -151.87,
-         "z": 2684.02
+         "text": "Center of cluster nr. 2 near ETA CARINA SECTOR EL-Y D16\nwith 24 guardian sites",
+         "x": 8653.8,
+         "y": -160.56,
+         "z": 2682.26
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 3 with 6 guardian sites",
-         "x": -9321.18,
-         "y": -403.1,
-         "z": 7951.34
+         "text": "Center of cluster nr. 3 near COL 173 SECTOR KT-G B40-2\nwith 3 guardian sites",
+         "x": 1172.03,
+         "y": -221.34,
+         "z": 167.28
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 4 with 3 guardian sites",
+         "text": "Center of cluster nr. 4 near PRAI HYPOO GF-E C10\nwith 15 guardian sites",
+         "x": -9322.28,
+         "y": -401.66,
+         "z": 7945.4
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster nr. 5 near EORL AUWSY SY-Z D13-3861\nwith 9 guardian sites",
          "x": 4950.75,
          "y": 162.56,
          "z": 20643.94
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 5 with 4 guardian sites",
+         "text": "Center of cluster nr. 6 near BLAA HYPAI EU-D C13-0\nwith 12 guardian sites",
          "x": 1254.95,
          "y": -724.91,
          "z": 12311.71
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 6 with 6 guardian sites",
-         "x": 14590.04,
-         "y": -254.41,
-         "z": 3530.29
+         "text": "Center of cluster nr. 7 near NGC 3199 SECTOR CQ-Y D6\nwith 14 guardian sites",
+         "x": 14588.89,
+         "y": -250.78,
+         "z": 3529.51
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 7 with 4 guardian sites",
+         "text": "Center of cluster nr. 8 near COL 173 SECTOR YF-N C7-5\nwith 7 guardian sites",
+         "x": 1089.62,
+         "y": -386.89,
+         "z": -395.46
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster nr. 9 near COL 173 SECTOR EM-L D8-60\nwith 8 guardian sites",
          "x": 1517.59,
          "y": -217.06,
          "z": 32.47
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 8 with 3 guardian sites",
-         "x": -768.97,
-         "y": -618.11,
-         "z": 13436.83
+         "text": "Center of cluster nr. 10 near GRAEA HYPUE LS-S D4-81\nwith 14 guardian sites",
+         "x": -778.55,
+         "y": -622.52,
+         "z": 13436.87
       }
    ]
 }

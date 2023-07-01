@@ -1,3 +1,5 @@
+
+
 import sys
 import os
 import json
@@ -14,10 +16,31 @@ from  edcompanion import navroute
 from  edcompanion import events
 from edcompanion.events import edc_track_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
-from edcompanion.edsm_api import get_edsm_info, distance_between_systems
+from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk
 
 syslog = init_console_logging(__name__)
 edlogspath = "/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
+
+import math
+from itertools import permutations
+
+def parse_route_systems(system_name, mission_db):
+    return { **{
+        system_name:np.asarray([get_edsm_info(system_name, verbose=False).get('coords',{}).get(k) for k in ['x', 'y', 'z']])
+    }, **{
+        s.get('DestinationSystem'):np.asarray([get_edsm_info(s.get('DestinationSystem'), verbose=False).get('coords',{}).get(k) for k in ['x', 'y', 'z']])
+        for s in mission_db.values() if s.get('coords',{})
+    }}
+
+
+def calculate_total_jumps(*route_points, jumpdistance=25):
+    return sum([1+math.floor(distance_between_systems(*rp)/jumpdistance) for rp in route_points])
+
+def get_mission_routes(start_system, mission_db, jumpdistance):
+    route_systems = parse_route_systems(start_system, mission_db)
+    all_routes = [r for r in permutations(route_systems) if r[0] == start_system]
+    return sorted([[(x,y) for x,y in zip(r, r[1:])] for r in all_routes], key=lambda R:calculate_total_jumps(*R, jumpdistance=jumpdistance))
+
 
 planet_values = {
     False: { # was-not-discovered
@@ -95,7 +118,6 @@ def init_poi_search():
 
     return edastro_poi, find_nearest_poi
 
-
 rankings = dict(
     Progress = dict(),
     Rank = dict()
@@ -105,13 +127,11 @@ modules = []
 ships = {}
 current_ship = None
 my_materials = {}
-missions = {}
 completed = {}
 signals = {}
 saascan = {}
 fuel_used = []
-fuel_level = []
-fuel_capacity = 1
+
 
 def follow_journal(backlog=0, verbose=False):
     def playsound(*args, **kwargs):
@@ -121,10 +141,22 @@ def follow_journal(backlog=0, verbose=False):
     starpos = np.asarray([0,0,0])
     guardian_system = False
     navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
+    missions = {}
+    completed = {}
+    try:
+        with open('missions.json', "rt") as jsonfile:
+            missions=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
+
+
+
     jumptimes = []
     system_name = ''
     systems = {}
     system_factions = []
+    fuel_level = []
+    fuel_capacity = 1
     entrytime = 0
     body_id = 0
     jumpdistance = 10
@@ -178,10 +210,8 @@ def follow_journal(backlog=0, verbose=False):
 
             # update state: system coordinates -----------------------------------------------
             starpos = np.asarray(event.get('StarPos', starpos))
-
-            sys.stdout.write(
-                f"\r{str(timestamp)[:-6]:20} "+
-                f"{timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} {'>' if guardian_system else '|'} ")
+            header = f"\r{str(timestamp)[:-6]:20} {timestamp.timestamp()-jumptimes[-1]:7,.0F} | {eventname:21} | {system_name:28} {'>' if guardian_system else '|'} "
+            sys.stdout.write(header)
 
             #
             # A big CASE ===========================================================
@@ -196,7 +226,7 @@ def follow_journal(backlog=0, verbose=False):
                 kb_stop = True
 
             elif eventname == 'Fileheader':
-                sys.stdout.write(f"{'Odyssey' if event.get('Odyssey', False) else 'Horizons' }\n")
+                sys.stdout.write(f"{'Odyssey' if event.get('Odyssey', False) else 'Horizons' }\n{header}")
 
             if eventname == 'FSDJump':
                 entrytime=timestamp.timestamp()
@@ -216,9 +246,9 @@ def follow_journal(backlog=0, verbose=False):
 
                 # handle mission updates
                 if mission_advice and not [True for item in navroute.edc_navigationroute(edlogspath) if item.get('StarSystem') == mission_advice]:
-                    mnames = ', '.join([m.get('LocalisedName', '') for i,m in missions.items() if mission_advice==m.get('DestinationSystem') ])
-                    sys.stdout.write(f"Travel to {mission_advice} for \"{mnames}\"\n")
-                    continue
+                    mnames = ', '.join(set([m.get('LocalisedName', '') for i,m in missions.items() if mission_advice==m.get('DestinationSystem') ]))
+                    sys.stdout.write(f"Travel to {mission_advice} for \"{mnames}\"\n{header}")
+
                 # "SystemAllegiance":"Guardian"
 
                 guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
@@ -232,16 +262,15 @@ def follow_journal(backlog=0, verbose=False):
 
                 # Points of interest
                 if system_name in edastro_poi:
-                    sys.stdout.write(f"Poi: {edastro_poi[system_name].get('name')}\n{edastro_poi[system_name].get('type'):20} | {edastro_poi[system_name].get('summary')}\n")
+                    sys.stdout.write(f"Poi: {edastro_poi[system_name].get('name')}\n{edastro_poi[system_name].get('type'):20} | {edastro_poi[system_name].get('summary')}\n{header}")
                 else:
-                    sys.stdout.write(f"\n")
+                    sys.stdout.write(f"\n{header}")
 
                 continue
 
             elif "NavRoute" in eventname:
                 navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
                 navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
-
 
             elif eventname == 'LoadGame':
                 entrytime=timestamp.timestamp()
@@ -253,9 +282,15 @@ def follow_journal(backlog=0, verbose=False):
             elif eventname == 'StartJump' and event.get("JumpType") == "Hyperspace":
                 if system_name in navi_route:
                     navi_route.pop(system_name)
-                sys.stdout.write(f"{event.get('StarSystem',''):25} | class {event.get('StarClass','')}\n") # FuelCapacity
+                sys.stdout.write(f"{event.get('StarSystem',''):25} | class {event.get('StarClass','')}\n{header}") # FuelCapacity
 
             elif eventname == 'FSDTarget':
+                sys.stdout.write(f"{event.get('Name',''):25} | class {event.get('StarClass','')}")
+
+                risk = get_edsm_system_risk(event.get('Name',''))
+                if risk > 1:
+                    sys.stdout.write(f"-> High Risk {round(risk,2)}")
+
                 # Fuel management assistance
                 navi_fuel = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items() if i.get('StarClass') in 'KGBFOAM'}
                 if navi_fuel:
@@ -263,19 +298,21 @@ def follow_journal(backlog=0, verbose=False):
                         lambda total, item:item if navi_fuel[item] < navi_fuel[total] else total,
                         list(navi_fuel)
                     )
+                    fuel_level = [l for l in fuel_level if l is not None]
                     fuel_ratio = round(100*fuel_level[-1] / fuel_capacity,1)
                     est_jumps = round(fuel_level[-1] / (.1+(statistics.mean(fuel_used) if fuel_used else 3)),1)
-                    sys.stdout.write(f"fuel {fuel_ratio}% -> {est_jumps} jumps, fuelstar at {round(navi_fuel[fuel_system],1)} ly ")
+                    sys.stdout.write(f", fuel {fuel_ratio}% -> {est_jumps} jumps, fuel at {round(navi_fuel[fuel_system],1)} ly\n{header}")
                     if est_jumps < 3:
                         playsound('./sound88.wav')
+                else:
+                     sys.stdout.write(f", {event.get('RemainingJumpsInRoute','')} jumps remaining\n{header}")
 
-                sys.stdout.write(f"{event.get('Name',''):25} | class {event.get('StarClass','')}, {event.get('RemainingJumpsInRoute','')} jumps remaining.\n")
 
             elif eventname == 'FuelScoop':
                 fuel_level.append(event.get('Total'))
                 fuel_ratio = round(100*event.get('Total') / fuel_capacity,1)
                 est_jumps = round(fuel_level[-1] / (.1+statistics.mean(fuel_used)),1)
-                sys.stdout.write(f"{fuel_ratio:3}% -> {est_jumps} jumps \n") # FuelCapacity
+                sys.stdout.write(f"{fuel_ratio:3}% -> {est_jumps} jumps \n{header}") # FuelCapacity
 
             elif eventname == 'Scan':
                 scan_body_id = event.get('BodyID')
@@ -288,15 +325,15 @@ def follow_journal(backlog=0, verbose=False):
                     systems[system_name]["stars"].add(scan_body_id)
                     sys.stdout.write(f"Class {event.get('StarType')}{event.get('Subclass')}")
                     if not event.get('WasDiscovered', True):
-                        sys.stdout.write(f"\t{'Undiscovered'}\n")
+                        sys.stdout.write(f"\t{'Undiscovered'} \n{header}")
                         playsound('./sound88.wav')
 
                 elif event.get('StarType'):
                     systems[system_name]["stars"].add(scan_body_id)
                     if event.get('StarType') not in 'KGBFOAM' and not event.get("WasDiscovered", True):
-                        sys.stdout.write(f"{event.get('BodyName')}, class {event.get('StarType')}-{event.get('Subclass')}, solar-mass: {round(event.get('StellarMass'),1)}\n")
+                        sys.stdout.write(f"{event.get('BodyName')}, class {event.get('StarType')}-{event.get('Subclass')}, solar-mass: {round(event.get('StellarMass'),1)} \n{header}")
                     elif len(system['stars'])>1:
-                        sys.stdout.write(f"Stars: {'/'.join([system['bodies'].get(i,{}).get('StarType','')  for i in system['stars']])}")
+                        sys.stdout.write(f"Stars: {'/'.join([system['bodies'].get(i,{}).get('StarType','')  for i in system['stars']])}\n{header}")
 
                 elif not event.get("WasDiscovered", True):
                     if event.get('TerraformState') == 'Terraformable' or planet_values.get(
@@ -312,14 +349,14 @@ def follow_journal(backlog=0, verbose=False):
                         else:
                             playsound('./sound88.wav')
 
-                        sys.stdout.write('\n')
+                        sys.stdout.write(f'\n{header}')
 
             # SAASignalsFound
             elif 'SAASignalsFound' == eventname:
 
                 if 'Guardian' in [S.get('Type_Localised') for S in event.get('Signals',[]) if S.get('Type_Localised')]:
                     guardian_system = True
-                    sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n")
+                    sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n{header}")
 
 
             elif 'FSSSignalDiscovered' == eventname:
@@ -335,17 +372,17 @@ def follow_journal(backlog=0, verbose=False):
                 saascan[system_name][event.get('BodyName')] = event
 
             elif 'Screenshot' in eventname:
-                sys.stdout.write(f"{event.get('Body')} {event.get('Filename')}\n")
+                sys.stdout.write(f"{event.get('Body')} {event.get('Filename')}\n{header}")
                 continue
 
             elif 'Interdict' in eventname:
-                sys.stdout.write(f"{event.get('Interdictor', '??'):22}\n")
+                sys.stdout.write(f"{event.get('Interdictor', '??'):22}\n{header}")
                 continue
-            
+
             elif eventname == 'Music': # "event":"Music", "MusicTrack":"Combat_Unknown"
                 sys.stdout.write(f"{event.get('MusicTrack'):22}")
                 if event.get('MusicTrack') == 'Combat_Unknown':
-                    sys.stdout.write(f"Uh-oh\n")
+                    sys.stdout.write(f"Uh-oh\n{header}")
                     playsound('./sound88.wav')
                 continue
 
@@ -374,27 +411,27 @@ def follow_journal(backlog=0, verbose=False):
                         missions[event['MissionID']]={
                             k:event.get(k, '').split('$')[0] for k in ['LocalisedName', 'Expiry', 'DestinationSystem', 'DestinationStation']
                         }
-                        #sys.stdout.write(f"({len(missions)}) {missions[event['MissionID']].get('LocalisedName')} -> {missions[event['MissionID']].get('DestinationSystem')}\n")
+                        sys.stdout.write(f"({len(missions)}) {missions[event['MissionID']].get('LocalisedName')} -> {missions[event['MissionID']].get('DestinationSystem')}\n{header}")
 
                     elif eventname == 'MissionRedirected':
                         missions[event['MissionID']].update({
                             k:event.get('New'+k) for k in ['DestinationSystem', 'DestinationStation']
                         })
-                        #sys.stdout.write(f"({len(missions)}) {missions[event['MissionID']].get('LocalisedName')} -> {missions[event['MissionID']].get('DestinationSystem')}\n")
+                        sys.stdout.write(f"({len(missions)}) {missions[event['MissionID']].get('LocalisedName')} -> {missions[event['MissionID']].get('DestinationSystem')}\n{header}")
 
                     missions.get(event['MissionID'], {}).update({
                         eventname: timestamp.isoformat(),
-                        'coords': get_edsm_info(missions.get(event['MissionID'], {}).get('DestinationSystem')).get('coords',[])
+                        'coords': get_edsm_info(missions.get(event['MissionID'], {}).get('DestinationSystem'), verbose=False).get('coords',[])
                     })
-                continue
+
                 ordered_routes = get_mission_routes(system_name, missions, jumpdistance=jumpdistance)
                 if ordered_routes:
                     best_route = ordered_routes[0]
                     if best_route:
                         s1, s2 = best_route[0]
                         mission_advice = s2
-                        mnames = ', '.join([m.get('LocalisedName', '') for i,m in missions.items() if s2==m.get('DestinationSystem') ])
-                        sys.stdout.write(f"Travel to {s2} ({1+math.floor(distance_between_systems(s1, s2)/jumpdistance)}) for \"{mnames}\"\n")
+                        mnames = ', '.join(set([m.get('LocalisedName', '') for i,m in missions.items() if s2==m.get('DestinationSystem') ]))
+                        sys.stdout.write(f"Travel to {s2} ({1+math.floor(distance_between_systems(s1, s2)/jumpdistance)}) for \"{mnames: <12}\"\n{header}")
                         continue
                 else:
                     mission_advice = ''
@@ -412,7 +449,9 @@ def follow_journal(backlog=0, verbose=False):
                 ships[event.get('ShipID')] = event.copy()
                 current_ship = ships[event.get('ShipID')]
                 jumpdistance = round(event.get('MaxJumpRange', 10),1)
-                sys.stdout.write(f"{event.get('Ship',''):15} {event.get('ShipIdent',''):6} {event.get('MaxJumpRange',''):5,.1F} ly\n")
+                sys.stdout.write(f"{event.get('Ship',''):15} {event.get('ShipIdent',''):6} {event.get('MaxJumpRange',''):5,.1F} ly\n{header}")
+                fuel_level.append(event.get('FuelLevel'))
+                fuel_capacity = max(event.get('FuelCapacity',{}).get('Main',1),1)
                 all_ships = {}
                 try:
                     with open('ships.json', "rt") as jsonfile:
@@ -434,14 +473,26 @@ def follow_journal(backlog=0, verbose=False):
                 my_materials = {T:{I.get("Name"):I.get("Count") for I in event.get(T,[])} for T in ['Raw','Encoded','Manufactured']}
                 #my_materials = {I.get("Name_Localised", I.get("Name")):I.get("Count") for I in item.get('Raw',[]) + item.get("Encoded",[])}
                 continue
-                
+
         sys.stdout.write(f"\nBye bye\n")
+
+        try:
+            with open('missions.json', "wt") as jsonfile:
+                json.dump(missions, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
+        try:
+            with open('completed.json', "wt") as jsonfile:
+                json.dump(completed, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
 
     return systems, system_name
 
 if __name__ == "__main__":
     try:
-        follow_journal(verbose=True)
+        follow_journal(backlog=0,verbose=True)
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
     print(f"\nDone")

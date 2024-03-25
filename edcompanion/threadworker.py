@@ -42,7 +42,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
     def workloop():
         nonlocal task_queue, workerfunc, done_queue, stop_event
         # open contexts for redirection of stdout and stderr into logging
-        syslog.debug()("Starting thread loop for %s", str(workerfunc.__code__))
+        syslog.debug("Starting thread loop for %s", str(workerfunc.__code__))
 
         # indefinately keep getting new items from the queue to process
         while not stop_event.is_set():

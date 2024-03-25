@@ -12,14 +12,15 @@ import requests
 from playsound import playsound as original_play_sound
 
 from edcompanion import init_console_logging
-from  edcompanion import navroute
-from  edcompanion import events
+from edcompanion import navroute, events
 from edcompanion.events import edc_track_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
-from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk
+from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position
+from edcompanion.threadworker import create_threaded_worker
 
 syslog = init_console_logging(__name__)
-edlogspath = "/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
+edlogspath = os.path.join(os.getenv('HOME'), 'Saved Games', 'Frontier Developments', 'Elite Dangerous')
+#"/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
 
 import math
 from itertools import permutations
@@ -31,7 +32,6 @@ def parse_route_systems(system_name, mission_db):
         s.get('DestinationSystem'):np.asarray([get_edsm_info(s.get('DestinationSystem'), verbose=False).get('coords',{}).get(k) for k in ['x', 'y', 'z']])
         for s in mission_db.values() if s.get('coords',{})
     }}
-
 
 def calculate_total_jumps(*route_points, jumpdistance=25):
     return sum([1+math.floor(distance_between_systems(*rp)/jumpdistance) for rp in route_points])
@@ -90,7 +90,7 @@ planet_values = {
 }
 
 def init_poi_search():
-    print(f"Reading Points-Of-Interest from EDAstro ...")
+    syslog.debug(f"Reading Points-Of-Interest from EDAstro ...")
 
     req = requests.get('https://edastro.com/gec/json/all')
 
@@ -132,8 +132,10 @@ signals = {}
 saascan = {}
 fuel_used = []
 
+sound_queue =create_threaded_worker(original_play_sound)
 
 def follow_journal(backlog=0, verbose=False):
+    sound_queue.start()
     def playsound(*args, **kwargs):
         if verbose:
             original_play_sound(*args, **kwargs)
@@ -141,14 +143,20 @@ def follow_journal(backlog=0, verbose=False):
     starpos = np.asarray([0,0,0])
     guardian_system = False
     navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
+
     missions = {}
-    completed = {}
     try:
         with open('missions.json', "rt") as jsonfile:
             missions=json.load(jsonfile)
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
 
+    completed = {}
+    try:
+        with open('completed.json', "rt") as jsonfile:
+            completed=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
 
 
     jumptimes = []
@@ -476,12 +484,16 @@ def follow_journal(backlog=0, verbose=False):
 
         sys.stdout.write(f"\nBye bye\n")
 
+    sound_queue.stop()
+
+    if missions:
         try:
             with open('missions.json', "wt") as jsonfile:
                 json.dump(missions, jsonfile, indent=3)
         except Exception as x:
             sys.stdout.write(f"Error {x}\n")
 
+    if completed:
         try:
             with open('completed.json', "wt") as jsonfile:
                 json.dump(completed, jsonfile, indent=3)

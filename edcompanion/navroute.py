@@ -22,12 +22,13 @@ def edc_navigationroute(journalpath):
 
         navfile = os.path.join(journalpath, "NavRoute.json")
         syslog.debug(f"\Reading Navigation Route from {navfile}")
-        with open(navfile, "rt") as jsonfile:
-            for item in json.load(jsonfile).get('Route'):
-                if item.get('StarClass','') == 'N':
-                    currentdb.update({item.get('StarSystem'):item})
-                    
-                yield item
+        if os.path.exists(navfile):
+            with open(navfile, "rt") as jsonfile:
+                for item in json.load(jsonfile).get('Route'):
+                    if item.get('StarClass','') == 'N':
+                        currentdb.update({item.get('StarSystem'):item})
+                        
+                    yield item
 
         try:
             with open('collected_neutron_systems.json', "wt") as jsonfile:

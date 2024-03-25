@@ -34,11 +34,11 @@ syslog.info("Falcon version %s on ip-address %s\n", falcon.__version__, socket.g
 def create_companion_api():
     """
     Returns:
-        falcon.asgi.API 
+        falcon.asgi.API
     """
     # create with our middleware
     app = falcon.asgi.App(middleware=[
-        RequiresAuthentication(token=os.getenv("USR_TOKEN")), 
+        RequiresAuthentication(token=os.getenv("USR_TOKEN")),
         RouteTimer(),
         RequiredMediaTypes()])
 
@@ -146,7 +146,7 @@ class Endpoint(object):
     def __init__(self, datasource):
         self.datasource = datasource
 
-    
+
     def file_response(self, req, resp, dataframe):
         writeformat = req.get_param("format", default="json/split").lower()
         with io.BytesIO() as outfile:
@@ -158,20 +158,20 @@ class Endpoint(object):
             elif "json" in writeformat:
                 resp.content_type = "application/json"
                 self.write_json(
-                    outfile, dataframe, 
-                    writeformat, 
+                    outfile, dataframe,
+                    writeformat,
                     req.get_param("dateFormat", default="iso").lower())
 
             outfile.seek(0)
             resp.data = outfile.read()
-        
+
     def write_csv(self, outfile, adata):
 
         if isinstance(adata, pd.DataFrame):
             adata.to_csv(outfile, sep=',')
         else:
             np.savetxt(
-                outfile, adata, 
+                outfile, adata,
                 delimiter=",", comments='',
                 header=",".join(['time'] + [f"value_{str(i+1)}" for i in range(adata.shape[1]-1)])
             )
@@ -191,7 +191,7 @@ class Endpoint(object):
                         data=adata[:, 1:]
                     )
                 elif len(adata.shape) == 1:
-                    # Assume a record array                
+                    # Assume a record array
                     df = pd.DataFrame(adata)
 
             syslog.info(f"Writing Data from {str(df.info())}")
@@ -201,7 +201,7 @@ class Endpoint(object):
             elif s == 'split':
                 outfile.write(f'''{{"columns":{str(['time']+[c for c in df.columns]).replace("'",'"')}, "data":'''.encode(encoding='UTF-8'))
                 df.reset_index().to_json(outfile, orient='values', date_format=dateformat)
-                outfile.write(f'}}'.encode(encoding='UTF-8'))       
+                outfile.write(f'}}'.encode(encoding='UTF-8'))
 
             elif s == 'split-index':
                 df.to_json(outfile, orient='split', date_format=dateformat)
@@ -212,14 +212,14 @@ class Endpoint(object):
                 df.to_json(outfile, orient='table', date_format=dateformat, index=True)
             else:
                 df.reset_index().to_json(outfile, orient=s, date_format=dateformat)
-    
-                
+
+
 class SystemsEndpoint(Endpoint):
     def __init__(self, datasource):
         super().__init__(datasource)
-    
+
     join_types = dict(
-        inner=lambda T: f" INNER JOIN {T} ON {T}.systemname = systems.name "
+        inner=lambda T: f" INNER JOIN {T} ON {T}.systemname = systems.name ",
         left=f" LEFT JOIN {T} ON {T}.systemname = systems.name "
     )
 
@@ -230,7 +230,7 @@ class SystemsEndpoint(Endpoint):
                 from_item += SystemsEndpoint.join_types[include_definition](include_key)
 
     async def on_get(self, req, resp):
-        
+
         pgpool = await self.datasource.pool.pgsql_pool()
         qryfilter = json.loads(req.get_param('filter', default='{}'))
         if not qryfilter:
@@ -250,7 +250,7 @@ class SystemsEndpoint(Endpoint):
 
             distance = req.get_param_as_float('distance', default=40.0)
             assert len(coordinates) == 3
-            
+
             self.file_response(req, resp, await self.datasource.get_dataframe(
                 "SELECT systems.*, |/((x-$7)^2 + (y-$8)^2 + (z-$9)^2) as distance, populated.security "+
                 "FROM systems "+
@@ -260,26 +260,26 @@ class SystemsEndpoint(Endpoint):
                 "ORDER BY distance LIMIT 1",
                 *[d for c in coordinates for d in [c-distance, c+distance]], *coordinates, distance
             ))
-            return 
-                               
+            return
+
         from_item = "FROM systems "
         for include_key, include_definition in qryfilter.get('include', {}).items():
             if include_definition in ["iner"]
 
-        
+
 class StationsEndpoint(Endpoint):
     def __init__(self, datasource):
         super().__init__(datasource)
-        
+
     async def on_get(self, req, resp):
         syslog.error(f"Call of unimplemeted member")
         raise falcon.HTTPNotImplemented(
-            title="Not Implemented", 
+            title="Not Implemented",
             description="The resource has not implemented this functionality")
-        
 
 
-    
+
+
 companion_api = create_companion_api()
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_ed
 from edcompanion.threadworker import create_threaded_worker
 
 syslog = init_console_logging(__name__)
-edlogspath = os.path.join(os.getenv('HOME'), 'Saved Games', 'Frontier Developments', 'Elite Dangerous')
+edlogspath = os.path.join(os.getenv('HOME', os.getenv('USERPROFILE')), 'Saved Games', 'Frontier Developments', 'Elite Dangerous')
 #"/Users/fenke/Saved Games/Frontier Developments/Elite Dangerous"
 
 import math
@@ -133,13 +133,14 @@ bodysignals = {}
 saascan = {}
 fuel_used = []
 
-sound_queue =create_threaded_worker(original_play_sound)
+sound_queue = create_threaded_worker(original_play_sound)
+#bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
 def follow_journal(backlog=0, verbose=False):
     sound_queue.start()
     def playsound(*args, **kwargs):
         if verbose:
-            original_play_sound(*args, **kwargs)
+            sound_queue.put(*args, **kwargs)
 
     starpos = np.asarray([0,0,0])
     guardian_system = False
@@ -173,9 +174,15 @@ def follow_journal(backlog=0, verbose=False):
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
 
+    systems = {}
+    try:
+        with open('systems.json', "rt") as jsonfile:
+            systems=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
+
     jumptimes = []
     system_name = ''
-    systems = {}
     system_factions = []
     fuel_level = []
     fuel_capacity = 1
@@ -204,12 +211,15 @@ def follow_journal(backlog=0, verbose=False):
                     navi_route.pop(system_name)
 
                 if system_name not in systems:
+                    body_id = event.get('BodyID',0)
                     systems[system_name] = dict(
                         StarPos=event.get('StarPos',[]),
-                        bodies={event.get('BodyID',0):dict(Body=event.get('Body'), BodyType=event.get('BodyType'))},
-                        stars=set([event.get('BodyID',0)]) if bool(event.get('BodyType','') == 'Star') else set([])
+                        bodies={body_id:dict(Body=event.get('Body'), BodyType=event.get('BodyType'))},
+                        #stars={event.get('BodyID',0):{}} if bool(event.get('BodyType','') == 'Star') else {}
                     )
-                    system = systems[system_name]
+                    systems[system_name]['stars'] = {body_id:systems[system_name]['bodies'][body_id]} if bool(event.get('BodyType','') == 'Star') else {}
+
+                system = systems[system_name]
 
                 guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
                 if guardian_system:
@@ -254,7 +264,7 @@ def follow_journal(backlog=0, verbose=False):
                 entrytime=timestamp.timestamp()
                 body_id = event.get('BodyID')
                 system["BodyID"] = body_id
-                system['stars'].add(body_id)
+                #system['stars'] = list(set(system.get('stars',[])).add(body_id))
 
 
                 if system_name in navi_route:
@@ -338,20 +348,20 @@ def follow_journal(backlog=0, verbose=False):
 
             elif eventname == 'Scan':
                 scan_body_id = event.get('BodyID')
-                if scan_body_id not in systems[system_name]["bodies"]:
-                    systems[system_name]["bodies"] = event
+                if scan_body_id not in system["bodies"]:
+                    system["bodies"].update({scan_body_id:event})
                 else:
-                    systems[system_name]["bodies"].update(event)
+                    system["bodies"][scan_body_id].update(event)
 
                 if scan_body_id == body_id:
-                    systems[system_name]["stars"].add(scan_body_id)
-                    sys.stdout.write(f"Class {event.get('StarType')}{event.get('Subclass')}")
+                    sys.stdout.write(f"Class {event.get('StarType')}{event.get('Subclass')} ")
                     if not event.get('WasDiscovered', True):
-                        sys.stdout.write(f"\t{'Undiscovered'} \n{header}")
+                        sys.stdout.write(f" \t{'Undiscovered'} \n{header}")
                         playsound('./sound88.wav')
 
                 elif event.get('StarType'):
-                    systems[system_name]["stars"].add(scan_body_id)
+                    if scan_body_id not in system["stars"]:
+                        system["stars"].update({scan_body_id:system["bodies"][scan_body_id]})
                     if event.get('StarType') not in 'KGBFOAM' and not event.get("WasDiscovered", True):
                         sys.stdout.write(f"{event.get('BodyName')}, class {event.get('StarType')}-{event.get('Subclass')}, solar-mass: {round(event.get('StellarMass'),1)} \n{header}")
                     elif len(system['stars'])>1:
@@ -509,11 +519,20 @@ def follow_journal(backlog=0, verbose=False):
 
     sound_queue.stop()
 
+    if systems:
+        try:
+            with open('systems.json', "wt") as jsonfile:
+                json.dump(systems, jsonfile, indent=3)
+        except Exception as x:
+            syslog.exception('Error %s', str(x))
+            sys.stdout.write(f"Error {x}\n")
+
     if missions:
         try:
             with open('missions.json', "wt") as jsonfile:
                 json.dump(missions, jsonfile, indent=3)
         except Exception as x:
+            syslog.exception('Error %s', str(x))
             sys.stdout.write(f"Error {x}\n")
 
     if completed:
@@ -521,6 +540,7 @@ def follow_journal(backlog=0, verbose=False):
             with open('completed.json', "wt") as jsonfile:
                 json.dump(completed, jsonfile, indent=3)
         except Exception as x:
+            syslog.exception('Error %s', str(x))
             sys.stdout.write(f"Error {x}\n")
 
     if bodysignals:

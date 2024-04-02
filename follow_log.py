@@ -129,6 +129,7 @@ current_ship = None
 my_materials = {}
 completed = {}
 signals = {}
+bodysignals = {}
 saascan = {}
 fuel_used = []
 
@@ -158,6 +159,19 @@ def follow_journal(backlog=0, verbose=False):
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
 
+    bodysignals = {}
+    try:
+        with open('bodysignals.json', "rt") as jsonfile:
+            bodysignals=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
+
+    signals = {}
+    try:
+        with open('signals.json', "rt") as jsonfile:
+            signals=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
 
     jumptimes = []
     system_name = ''
@@ -211,7 +225,7 @@ def follow_journal(backlog=0, verbose=False):
                     })
                     try:
                         with open('guardian_systems.json', "wt") as jsonfile:
-                            json.dump(guardian_systems, jsonfile)
+                            json.dump(guardian_systems, jsonfile, indent=3)
                     except Exception as x:
                         sys.stdout.write(f"Error {x}\n")
 
@@ -359,10 +373,15 @@ def follow_journal(backlog=0, verbose=False):
 
                         sys.stdout.write(f'\n{header}')
 
+            elif 'FSSBodySignals' == eventname:
+                if system_name not in bodysignals:
+                    bodysignals[system_name] = []
+                bodysignals[system_name].append(event)
+
             # SAASignalsFound
             elif 'SAASignalsFound' == eventname:
 
-                if 'Guardian' in [S.get('Type_Localised') for S in event.get('Signals',[]) if S.get('Type_Localised')]:
+                if 'guardian' in [S.get('Type_Localised').lower() for S in event.get('Signals',[]) if S.get('Type_Localised')]:
                     guardian_system = True
                     sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n{header}")
 
@@ -371,8 +390,12 @@ def follow_journal(backlog=0, verbose=False):
                 signal = event.get("SignalName_Localised", None)
                 if signal:
                     if signal not in signals:
-                        signals[signal] = set()
-                    signals.get(signal).add((system_name,system_factions[0] if system_factions else '-'))
+                        signals[signal] = dict()
+                    if system_name not in signals[signal]:
+                        signals[signal][system_name] = []
+                    signals.get(signal).get(system_name).append(event)
+                    
+                    #.add((system_name,system_factions[0] if system_factions else '-'))
 
             elif 'SAAScanComplete' == eventname:
                 if system_name not in saascan:
@@ -500,11 +523,25 @@ def follow_journal(backlog=0, verbose=False):
         except Exception as x:
             sys.stdout.write(f"Error {x}\n")
 
+    if bodysignals:
+        try:
+            with open('bodysignals.json', "wt") as jsonfile:
+                json.dump(bodysignals, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
+    if signals:
+        try:
+            with open('signals.json', "wt") as jsonfile:
+                json.dump(signals, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
     return systems, system_name
 
 if __name__ == "__main__":
     try:
-        follow_journal(backlog=0,verbose=True)
+        follow_journal(backlog=200,verbose=True)
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
     print(f"\nDone")

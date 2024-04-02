@@ -9,87 +9,150 @@
       },
       {
          "pin": "red",
+         "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81",
+         "x": 573.59375,
+         "y": -339.46875,
+         "z": -1167.65625
+      },
+      {
+         "pin": "red",
          "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
          "x": 573.59375,
          "y": -339.46875,
          "z": -1167.65625
       },
       {
-         "pin": "cyan",
-         "text": "Center of cluster nr. 0 near VELA DARK REGION EG-X B1-1\nwith 434 guardian sites",
-         "x": 944.39,
-         "y": -138.87,
-         "z": -123.32
+         "pin": "red",
+         "text": "type                : Structures\nSiteId              : 200\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal",
+         "x": 1077.375,
+         "y": 400.5625,
+         "z": -993.375
+      },
+      {
+         "pin": "red",
+         "text": "type                : Structures\nSiteId              : 201\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal",
+         "x": 1077.375,
+         "y": 400.5625,
+         "z": -993.375
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 1 near PRUA PHOE TS-B D252\nwith 21 guardian sites",
+         "text": "Center of cluster 0 with 485 guardian sites",
+         "x": 963.93,
+         "y": -143.48,
+         "z": -118.95
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 1 with 21 guardian sites",
          "x": -5508.69,
          "y": -540.86,
          "z": 10520.3
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 2 near ETA CARINA SECTOR EL-Y D16\nwith 24 guardian sites",
-         "x": 8653.8,
-         "y": -160.56,
-         "z": 2682.26
+         "text": "Center of cluster 2 with 26 guardian sites",
+         "x": 8655.06,
+         "y": -153.22,
+         "z": 2682.14
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 3 near COL 173 SECTOR KT-G B40-2\nwith 3 guardian sites",
-         "x": 1172.03,
-         "y": -221.34,
-         "z": 167.28
+         "text": "Center of cluster 3 with 15 guardian sites",
+         "x": 1112.86,
+         "y": -210.37,
+         "z": 202.45
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 4 near PRAI HYPOO GF-E C10\nwith 15 guardian sites",
-         "x": -9322.28,
-         "y": -401.66,
-         "z": 7945.4
+         "text": "Center of cluster 4 with 19 guardian sites",
+         "x": -9303.99,
+         "y": -403.82,
+         "z": 7928.94
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 5 near EORL AUWSY SY-Z D13-3861\nwith 9 guardian sites",
-         "x": 4950.75,
-         "y": 162.56,
-         "z": 20643.94
+         "text": "Center of cluster 5 with 14 guardian sites",
+         "x": 4954.17,
+         "y": 159.51,
+         "z": 20640.97
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 6 near BLAA HYPAI EU-D C13-0\nwith 12 guardian sites",
-         "x": 1254.95,
-         "y": -724.91,
-         "z": 12311.71
+         "text": "Center of cluster 6 with 22 guardian sites",
+         "x": 1227.25,
+         "y": -705.39,
+         "z": 12334.83
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 7 near NGC 3199 SECTOR CQ-Y D6\nwith 14 guardian sites",
-         "x": 14588.89,
-         "y": -250.78,
-         "z": 3529.51
+         "text": "Center of cluster 7 with 21 guardian sites",
+         "x": 14583.05,
+         "y": -238.23,
+         "z": 3564.39
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 8 near COL 173 SECTOR YF-N C7-5\nwith 7 guardian sites",
-         "x": 1089.62,
-         "y": -386.89,
-         "z": -395.46
+         "text": "Center of cluster 8 with 20 guardian sites",
+         "x": 1056.05,
+         "y": -389.11,
+         "z": -387.77
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 9 near COL 173 SECTOR EM-L D8-60\nwith 8 guardian sites",
-         "x": 1517.59,
-         "y": -217.06,
-         "z": 32.47
+         "text": "Center of cluster 9 with 13 guardian sites",
+         "x": 1523.84,
+         "y": -208.41,
+         "z": 38.16
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster nr. 10 near GRAEA HYPUE LS-S D4-81\nwith 14 guardian sites",
-         "x": -778.55,
-         "y": -622.52,
-         "z": 13436.87
+         "text": "Center of cluster 10 with 15 guardian sites",
+         "x": -777.37,
+         "y": -623.76,
+         "z": 13436.52
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 11 with 14 guardian sites",
+         "x": -623.71,
+         "y": -554.08,
+         "z": 13263.77
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 12 with 12 guardian sites",
+         "x": -904.64,
+         "y": -656.2,
+         "z": 13536.07
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 13 with 11 guardian sites",
+         "x": -678.35,
+         "y": -322.46,
+         "z": 13350.63
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 14 with 14 guardian sites",
+         "x": -1016.32,
+         "y": -559.56,
+         "z": 13184.65
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 15 with 12 guardian sites",
+         "x": -1123.76,
+         "y": -397.15,
+         "z": 13388.27
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 16 with 5 guardian sites",
+         "x": -1039.31,
+         "y": -488.84,
+         "z": 13616.98
       }
    ]
 }

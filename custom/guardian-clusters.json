@@ -2,13 +2,6 @@
    "markers": [
       {
          "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 1\nSystem Name         : SYNUEFE XR-H D11-102\nx                   : 357.34375\ny                   : -49.34375\nz                   : -74.75\nPrimary Star        : F (White) Star\nBody Name           :  1 B\nBody Sub Type       : Rocky body\nDistance To Arrival : 797\nDiscovered By       : MauserPT7",
-         "x": 357.34375,
-         "y": -49.34375,
-         "z": -74.75
-      },
-      {
-         "pin": "red",
          "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81",
          "x": 573.59375,
          "y": -339.46875,
@@ -37,10 +30,10 @@
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 0 with 485 guardian sites",
-         "x": 963.93,
-         "y": -143.48,
-         "z": -118.95
+         "text": "Center of cluster 0 with 499 guardian sites",
+         "x": 977.3,
+         "y": -144.99,
+         "z": -114.77
       },
       {
          "pin": "cyan",
@@ -100,56 +93,42 @@
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 9 with 13 guardian sites",
-         "x": 1523.84,
-         "y": -208.41,
-         "z": 38.16
+         "text": "Center of cluster 9 with 27 guardian sites",
+         "x": -833.93,
+         "y": -638.18,
+         "z": 13480.76
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 10 with 15 guardian sites",
-         "x": -777.37,
-         "y": -623.76,
-         "z": 13436.52
-      },
-      {
-         "pin": "cyan",
-         "text": "Center of cluster 11 with 14 guardian sites",
+         "text": "Center of cluster 10 with 14 guardian sites",
          "x": -623.71,
          "y": -554.08,
          "z": 13263.77
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 12 with 12 guardian sites",
-         "x": -904.64,
-         "y": -656.2,
-         "z": 13536.07
-      },
-      {
-         "pin": "cyan",
-         "text": "Center of cluster 13 with 11 guardian sites",
+         "text": "Center of cluster 11 with 11 guardian sites",
          "x": -678.35,
          "y": -322.46,
          "z": 13350.63
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 14 with 14 guardian sites",
+         "text": "Center of cluster 12 with 14 guardian sites",
          "x": -1016.32,
          "y": -559.56,
          "z": 13184.65
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 15 with 12 guardian sites",
+         "text": "Center of cluster 13 with 12 guardian sites",
          "x": -1123.76,
          "y": -397.15,
          "z": 13388.27
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 16 with 5 guardian sites",
+         "text": "Center of cluster 14 with 5 guardian sites",
          "x": -1039.31,
          "y": -488.84,
          "z": 13616.98

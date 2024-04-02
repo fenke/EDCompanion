@@ -2,6 +2,7 @@
 
 import sys
 import os
+import time
 import json
 import statistics
 from functools import reduce
@@ -181,6 +182,9 @@ def follow_journal(backlog=0, verbose=False):
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
 
+    eventdump = []
+    signaldump ={}
+
     jumptimes = []
     system_name = ''
     system_factions = []
@@ -197,6 +201,17 @@ def follow_journal(backlog=0, verbose=False):
     while not kb_stop:
 
         for event in edc_track_journal(edlogspath, backlog=backlog):
+            if 'guardian' in str(event).lower():
+                if event.get('event','') not in [
+                    'Materials', 'Loadout', 'StoredModules',
+                    'ModuleStore', 'ModuleRetrieve', 'ModuleBuy',
+                    'ModuleSellRemote', 'MaterialCollected', 
+                    'CollectCargo', 'EjectCargo', 'Music', 'Cargo', 
+                    'Touchdown', 'Liftoff', 'ApproachSettlement',
+                    'CodexEntry', 'Location'
+                ] and not event.get('IsStation') and not 'Guardians of Tradition' in str(event):
+                    eventdump.append(event.copy())
+
             timestamp = make_datetime(event.pop("timestamp"))
             eventname = event.pop("event")
 
@@ -221,7 +236,7 @@ def follow_journal(backlog=0, verbose=False):
 
                 system = systems[system_name]
 
-                guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
+                guardian_system = bool(event.get('SystemAllegiance', "").lower() == 'guardian')
                 if guardian_system:
                     guardian_systems = {}
                     try:
@@ -394,6 +409,8 @@ def follow_journal(backlog=0, verbose=False):
                 if 'guardian' in [S.get('Type_Localised').lower() for S in event.get('Signals',[]) if S.get('Type_Localised')]:
                     guardian_system = True
                     sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n{header}")
+    
+                    playsound('sonar-ping.wav')
 
 
             elif 'FSSSignalDiscovered' == eventname:
@@ -515,6 +532,18 @@ def follow_journal(backlog=0, verbose=False):
                 #my_materials = {I.get("Name_Localised", I.get("Name")):I.get("Count") for I in item.get('Raw',[]) + item.get("Encoded",[])}
                 continue
 
+            if ('scan' in eventname.lower() or 'signal' in eventname.lower())  and 'guardian' in str(event).lower() and not event.get('IsStation'):
+                if eventname not in signaldump:
+                    signaldump[eventname]={}
+                if system_name not in signaldump:
+                    signaldump[eventname][system_name] = {}
+                if event.get('BodyName', '-') not in signaldump[eventname][system_name]:
+                    signaldump[eventname][system_name][event.get('BodyName', '-')] =[]
+
+                signaldump[eventname][system_name][event.get('BodyName', '-')].append(event.copy())
+
+                sys.stdout.write(f"Signal at {event.get('BodyName', event.get('SignalName', '??'))} {', '.join([s.get('Type_Localised') for s in event.get('Signals',[])])} \n{header}") # FuelCapacity
+
         sys.stdout.write(f"\nBye bye\n")
 
     sound_queue.stop()
@@ -557,11 +586,33 @@ def follow_journal(backlog=0, verbose=False):
         except Exception as x:
             sys.stdout.write(f"Error {x}\n")
 
+    if saascan:
+        try:
+            with open('saascan.json', "wt") as jsonfile:
+                json.dump(saascan, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
+    if eventdump:
+        try:
+            with open('eventdump.json', "wt") as jsonfile:
+                json.dump(eventdump, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+    
+    if signaldump:
+        try:
+            with open('signaldump.json', "wt") as jsonfile:
+                json.dump(signaldump, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
+
     return systems, system_name
 
 if __name__ == "__main__":
     try:
-        follow_journal(backlog=200,verbose=True)
+        follow_journal(backlog=0,verbose=True)
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
     print(f"\nDone")

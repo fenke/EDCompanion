@@ -147,6 +147,14 @@ def follow_journal(backlog=0, verbose=False):
     guardian_system = False
     navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
 
+    guardian_systems = {}
+    try:
+        with open('guardian_systems.json', "rt") as jsonfile:
+            guardian_systems=json.load(jsonfile)
+    except Exception as x:
+        sys.stdout.write(f"Error {x}\n")
+
+
     missions = {}
     try:
         with open('missions.json', "rt") as jsonfile:
@@ -269,22 +277,9 @@ def follow_journal(backlog=0, verbose=False):
 
                 guardian_system = bool(event.get('SystemAllegiance', "").lower() == 'guardian')
                 if guardian_system:
-                    guardian_systems = {}
-                    try:
-                        with open('guardian_systems.json', "rt") as jsonfile:
-                            guardian_systems=json.load(jsonfile)
-                    except Exception as x:
-                        sys.stdout.write(f"Error {x}\n")
-
                     guardian_systems.update({
                         system_name: system.get('StarPos',[])
                     })
-                    try:
-                        with open('guardian_systems.json', "wt") as jsonfile:
-                            json.dump(guardian_systems, jsonfile, indent=3)
-                    except Exception as x:
-                        sys.stdout.write(f"Error {x}\n")
-
 
             # update state: system coordinates -----------------------------------------------
             starpos = np.asarray(event.get('StarPos', starpos))
@@ -462,6 +457,10 @@ def follow_journal(backlog=0, verbose=False):
 
                 if 'guardian' in [S.get('Type_Localised').lower() for S in event.get('Signals',[]) if S.get('Type_Localised')]:
                     guardian_system = True
+                    guardian_systems.update({
+                        system_name: system.get('StarPos',[])
+                    })
+
                     sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n{header}")
 
                     playsound('sonar-ping.wav')
@@ -663,6 +662,13 @@ def follow_journal(backlog=0, verbose=False):
         try:
             with open('signaldump.json', "wt") as jsonfile:
                 json.dump(signaldump, jsonfile, indent=3)
+        except Exception as x:
+            sys.stdout.write(f"Error {x}\n")
+
+    if guardian_systems:
+        try:
+            with open('guardian_systems.json', "wt") as jsonfile:
+                json.dump(guardian_systems, jsonfile, indent=3)
         except Exception as x:
             sys.stdout.write(f"Error {x}\n")
 

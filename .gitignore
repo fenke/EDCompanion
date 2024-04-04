@@ -162,4 +162,5 @@ ships.json
 data/PGSectorNames.zip
 missions.json
 data/*.json
+data/sectors/
 journals/

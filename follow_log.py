@@ -175,14 +175,17 @@ def follow_journal(backlog=0, verbose=False):
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
 
-    systems = {}
-    try:
-        with open('systems.json', "rt") as jsonfile:
-            systems=json.load(jsonfile)
-    except Exception as x:
-        sys.stdout.write(f"Error {x}\n")
+    current_sector = ''
+    sector = {}
 
-    eventdump = []
+    #systems = {}
+    # try:
+    #     with open('systems.json', "rt") as jsonfile:
+    #         systems=json.load(jsonfile)
+    # except Exception as x:
+    #     sys.stdout.write(f"Error {x}\n")
+
+    eventdump = {}
     signaldump ={}
 
     jumptimes = []
@@ -196,45 +199,73 @@ def follow_journal(backlog=0, verbose=False):
     mission_advice = ""
     edastro_poi, find_nearest_poi = init_poi_search()
 
+
     kb_stop = False
     last_journal = ''
     while not kb_stop:
 
         for event in edc_track_journal(edlogspath, backlog=backlog):
+            eventname = event.pop("event")
+
+            # Finding guardian things to monitor --------------------
             if 'guardian' in str(event).lower():
-                if event.get('event','') not in [
+                if eventname not in [
                     'Materials', 'Loadout', 'StoredModules',
                     'ModuleStore', 'ModuleRetrieve', 'ModuleBuy',
-                    'ModuleSellRemote', 'MaterialCollected', 
-                    'CollectCargo', 'EjectCargo', 'Music', 'Cargo', 
+                    'ModuleSellRemote', 'MaterialCollected',
+                    'CollectCargo', 'EjectCargo', 'Music', 'Cargo',
                     'Touchdown', 'Liftoff', 'ApproachSettlement',
-                    'CodexEntry', 'Location'
-                ] and not event.get('IsStation') and not 'Guardians of Tradition' in str(event):
-                    eventdump.append(event.copy())
+                    'CodexEntry', 'Location', 'ModuleSell', 'Repair',
+                    'TechnologyBroker', 'FetchRemoteModule', 'MaterialDiscovered',
+                    'FetchRemoteModule', 'AfmuRepairs', 'JetConeDamage',
+                    ''
+
+                ] and not event.get('IsStation') and not 'Guardians of' in str(event):
+                    if eventname not in eventdump:
+                        eventdump[eventname]=[]
+                    eventdump[eventname].append(event.copy())
 
             timestamp = make_datetime(event.pop("timestamp"))
-            eventname = event.pop("event")
 
             # general / state =============================================================
             if not jumptimes:
                 entrytime=timestamp.timestamp()
                 jumptimes.append(timestamp.timestamp())
+
+            # Current location ------------------------------------------------------------
             if eventname == 'Location' or eventname == 'FSDJump':
                 # set current star system
                 system_name = event.get('StarSystem')
                 if system_name in navi_route:
                     navi_route.pop(system_name)
 
-                if system_name not in systems:
-                    body_id = event.get('BodyID',0)
-                    systems[system_name] = dict(
+                sector_name = system_name.split(' ')[0]
+                sector_filename = os.path.join(os.getcwd(), 'data', 'sectors', sector_name + '.json')
+
+                if current_sector != sector_filename:
+                    if sector:
+                        with open(current_sector, 'wt') as jsonfile:
+                            json.dump(sector, jsonfile, indent=3)
+
+                    current_sector = sector_filename
+
+                    if os.path.exists(sector_filename):
+                        with open(sector_filename, 'rt') as jsonfile:
+                            sector = json.load(jsonfile)
+                    else:
+                        sector = {}
+
+
+                if system_name not in sector:
+                    body_id = str(event.get('BodyID',0))
+                    sector[system_name] = dict(
                         StarPos=event.get('StarPos',[]),
                         bodies={body_id:dict(Body=event.get('Body'), BodyType=event.get('BodyType'))},
                         #stars={event.get('BodyID',0):{}} if bool(event.get('BodyType','') == 'Star') else {}
                     )
-                    systems[system_name]['stars'] = {body_id:systems[system_name]['bodies'][body_id]} if bool(event.get('BodyType','') == 'Star') else {}
+                    sector[system_name]['stars'] = {i:b for i,b in sector[system_name]['bodies'].items() if b.get('BodyType','') == 'Star'}
 
-                system = systems[system_name]
+                system = sector[system_name]
 
                 guardian_system = bool(event.get('SystemAllegiance', "").lower() == 'guardian')
                 if guardian_system:
@@ -246,7 +277,7 @@ def follow_journal(backlog=0, verbose=False):
                         sys.stdout.write(f"Error {x}\n")
 
                     guardian_systems.update({
-                        system_name: systems[system_name].get('StarPos',[])
+                        system_name: system.get('StarPos',[])
                     })
                     try:
                         with open('guardian_systems.json', "wt") as jsonfile:
@@ -275,9 +306,25 @@ def follow_journal(backlog=0, verbose=False):
             elif eventname == 'Fileheader':
                 sys.stdout.write(f"{'Odyssey' if event.get('Odyssey', False) else 'Horizons' }\n{header}")
 
+            if 'Signals' in event:
+                _signals = event.get('Signals', [])
+                _bodyname = event.get('BodyName', '')
+                if _signals and _bodyname:
+                    if eventname not in system:
+                        system[eventname] = dict()
+                    system[eventname][_bodyname] = _signals
+
+                _counts = dict()
+                for n,b in  system[eventname].items():
+                    for s in b:
+                        _counts[s.get('Type')] = _counts.get(s.get('Type'),0) + s.get('Count', 0)
+                system[f"{eventname}_counts"] = _counts
+
+                sys.stdout.write(f"Signals: {sum([c for c in _counts.values()])}")
+
             if eventname == 'FSDJump':
                 entrytime=timestamp.timestamp()
-                body_id = event.get('BodyID')
+                body_id = str(event.get('BodyID'))
                 system["BodyID"] = body_id
                 #system['stars'] = list(set(system.get('stars',[])).add(body_id))
 
@@ -361,8 +408,15 @@ def follow_journal(backlog=0, verbose=False):
                 est_jumps = round(fuel_level[-1] / (.1+statistics.mean(fuel_used)),1)
                 sys.stdout.write(f"{fuel_ratio:3}% -> {est_jumps} jumps \n{header}") # FuelCapacity
 
+            elif eventname == 'FSSDiscoveryScan':
+                if eventname not in system:
+                    system[eventname] = {}
+                system[eventname].update({k:event.get(k) for k in ['BodyCount','NonBodyCount','Progress']})
+
+                sys.stdout.write(f"Discovery {', '.join([str(k) + ': ' + str(v) for k,v in system[eventname].items() ])} \n{header}")
+
             elif eventname == 'Scan':
-                scan_body_id = event.get('BodyID')
+                scan_body_id = str(event.get('BodyID'))
                 if scan_body_id not in system["bodies"]:
                     system["bodies"].update({scan_body_id:event})
                 else:
@@ -409,7 +463,7 @@ def follow_journal(backlog=0, verbose=False):
                 if 'guardian' in [S.get('Type_Localised').lower() for S in event.get('Signals',[]) if S.get('Type_Localised')]:
                     guardian_system = True
                     sys.stdout.write(f"Guardian Signals: {event.get('BodyName')}, count= {[S.get('Count') for S in event.get('Signals',[]) if S.get('Type_Localised')=='Guardian'][0]}\n{header}")
-    
+
                     playsound('sonar-ping.wav')
 
 
@@ -421,7 +475,7 @@ def follow_journal(backlog=0, verbose=False):
                     if system_name not in signals[signal]:
                         signals[signal][system_name] = []
                     signals.get(signal).get(system_name).append(event)
-                    
+
                     #.add((system_name,system_factions[0] if system_factions else '-'))
 
             elif 'SAAScanComplete' == eventname:
@@ -548,13 +602,20 @@ def follow_journal(backlog=0, verbose=False):
 
     sound_queue.stop()
 
-    if systems:
+    if sector and current_sector:
         try:
-            with open('systems.json', "wt") as jsonfile:
-                json.dump(systems, jsonfile, indent=3)
+            with open(current_sector, 'wt') as jsonfile:
+                json.dump(sector, jsonfile, indent=3)
         except Exception as x:
             syslog.exception('Error %s', str(x))
-            sys.stdout.write(f"Error {x}\n")
+
+    # if systems:
+    #     try:
+    #         with open('systems.json', "wt") as jsonfile:
+    #             json.dump(systems, jsonfile, indent=3)
+    #     except Exception as x:
+    #         syslog.exception('Error %s', str(x))
+    #         sys.stdout.write(f"Error {x}\n")
 
     if missions:
         try:
@@ -562,7 +623,6 @@ def follow_journal(backlog=0, verbose=False):
                 json.dump(missions, jsonfile, indent=3)
         except Exception as x:
             syslog.exception('Error %s', str(x))
-            sys.stdout.write(f"Error {x}\n")
 
     if completed:
         try:
@@ -570,7 +630,6 @@ def follow_journal(backlog=0, verbose=False):
                 json.dump(completed, jsonfile, indent=3)
         except Exception as x:
             syslog.exception('Error %s', str(x))
-            sys.stdout.write(f"Error {x}\n")
 
     if bodysignals:
         try:
@@ -599,7 +658,7 @@ def follow_journal(backlog=0, verbose=False):
                 json.dump(eventdump, jsonfile, indent=3)
         except Exception as x:
             sys.stdout.write(f"Error {x}\n")
-    
+
     if signaldump:
         try:
             with open('signaldump.json', "wt") as jsonfile:
@@ -608,7 +667,7 @@ def follow_journal(backlog=0, verbose=False):
             sys.stdout.write(f"Error {x}\n")
 
 
-    return systems, system_name
+    return sector, system_name
 
 if __name__ == "__main__":
     try:

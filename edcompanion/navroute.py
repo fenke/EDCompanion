@@ -27,12 +27,12 @@ def edc_navigationroute(journalpath):
                 for item in json.load(jsonfile).get('Route'):
                     if item.get('StarClass','') == 'N':
                         currentdb.update({item.get('StarSystem'):item})
-                        
+
                     yield item
 
         try:
             with open('collected_neutron_systems.json', "wt") as jsonfile:
-                json.dump(currentdb, jsonfile)
+                json.dump(currentdb, jsonfile, indent=2)
         except Exception as x:
             pass
 

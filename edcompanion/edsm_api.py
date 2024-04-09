@@ -23,6 +23,7 @@ def get_commander_position(commandername, token):
 
 @lru_cache(512)
 def get_edsm_info(systemname, verbose=True):
+    '''Retrieves information about a named system. '''
     if not systemname:
         return {}
     req = requests.get(

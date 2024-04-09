@@ -2,38 +2,38 @@
    "markers": [
       {
          "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81",
+         "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81\nRotational Period   : 8.524807315\nGravity             : 0.3059238068\nRegion (Journal)    : Inner Orion Spur\nSite Type           : Alpha\nRegion (Calculated) : Inner Orion Spur\nSurface Temperature : 246\nOrbital Eccentricity: nan\nVolcanism           : No volcanism\nOrbital Period      : 8.374837745",
          "x": 573.59375,
          "y": -339.46875,
          "z": -1167.65625
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix",
+         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix\nRotational Period   : 8.524807315\nGravity             : 0.3059238068\nRegion (Journal)    : Inner Orion Spur\nSite Type           : Squid\nRegion (Calculated) : Inner Orion Spur\nSurface Temperature : 246\nOrbital Eccentricity: nan\nVolcanism           : No volcanism\nOrbital Period      : 8.374837745",
          "x": 573.59375,
          "y": -339.46875,
          "z": -1167.65625
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 200\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal",
+         "text": "type                : Structures\nSiteId              : 200\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nRotational Period   : 11.49914532\nGravity             : 0.1029534669\nRegion (Journal)    : Unknown\nSite Type           : Stickyhand\nRegion (Calculated) : Inner Orion Spur\nSurface Temperature : 58\nOrbital Eccentricity: 0.001431\nVolcanism           : No volcanism\nOrbital Period      : 11.49832809",
          "x": 1077.375,
          "y": 400.5625,
          "z": -993.375
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 201\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal",
+         "text": "type                : Structures\nSiteId              : 201\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nRotational Period   : 11.49914532\nGravity             : 0.1029534669\nRegion (Journal)    : Unknown\nSite Type           : Bear\nRegion (Calculated) : Inner Orion Spur\nSurface Temperature : 58\nOrbital Eccentricity: 0.001431\nVolcanism           : No volcanism\nOrbital Period      : 11.49832809",
          "x": 1077.375,
          "y": 400.5625,
          "z": -993.375
       },
       {
          "pin": "cyan",
-         "text": "Center of cluster 0 with 499 guardian sites",
-         "x": 977.3,
-         "y": -144.99,
-         "z": -114.77
+         "text": "Center of cluster 0 with 469 guardian sites",
+         "x": 995.7,
+         "y": -146.43,
+         "z": -116.02
       },
       {
          "pin": "cyan",

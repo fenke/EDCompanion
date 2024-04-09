@@ -341,8 +341,8 @@ def follow_journal(backlog=0, verbose=False):
                 system["BodyID"] = body_id
                 #system['stars'] = list(set(system.get('stars',[])).add(body_id))
                 d1 = distance_1(event.get('StarPos'))
-                if d1 < 400:
-                    sys.stdout.write(f"Distance to Line 1: {d1:8}\n{header}")
+                if d1 < 2000:
+                    sys.stdout.write(f"Distance to Line 1: {d1:8}")
 
 
                 if system_name in navi_route:
@@ -380,7 +380,16 @@ def follow_journal(backlog=0, verbose=False):
 
             elif "NavRoute" in eventname:
                 navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
-                navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
+                #navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
+                navi_distances_l1 =  {s:distance_1(i.get('StarPos')) for s, i in navi_route.items()}
+
+                if len(navi_distances_l1) > 0:
+                    min_d1, max_d1 = min(navi_distances_l1.values()), max(navi_distances_l1.values())
+                    if min_d1 < 2000:
+                        if len(navi_distances_l1) > 5:
+                            sys.stdout.write(f"Distances to L1 between {min_d1} and {max_d1} \n{header}")
+                        else:
+                            sys.stdout.write(f"Distances to L1: {' / '.join([str(v) for v in navi_distances_l1.values()])} \n{header}")
 
             elif eventname == 'LoadGame':
                 entrytime=timestamp.timestamp()

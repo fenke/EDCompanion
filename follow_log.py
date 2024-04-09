@@ -137,6 +137,24 @@ fuel_used = []
 sound_queue = create_threaded_worker(original_play_sound)
 #bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
+
+try:
+    with open(f"data/guardian/glines.json", 'rt') as jsonfile:
+        glines = json.load(jsonfile)
+
+    def distance_0(point):
+        return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['mean']))/np.linalg.norm(glines['line_0']['direction']),2)
+
+    def distance_1(point):
+        return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['mean']))/np.linalg.norm(glines['line_1']['direction']),2)
+
+
+except:
+    def distance_0(*_):
+        return 0
+    def distance_1(*_):
+        return 0
+
 def follow_journal(backlog=0, verbose=False):
     sound_queue.start()
     def playsound(*args, **kwargs):
@@ -322,6 +340,9 @@ def follow_journal(backlog=0, verbose=False):
                 body_id = str(event.get('BodyID'))
                 system["BodyID"] = body_id
                 #system['stars'] = list(set(system.get('stars',[])).add(body_id))
+                d1 = distance_1(event.get('StarPos'))
+                if d1 < 400:
+                    sys.stdout.write(f"Distance to Line 1: {d1:8}\n{header}")
 
 
                 if system_name in navi_route:
@@ -342,7 +363,7 @@ def follow_journal(backlog=0, verbose=False):
 
                 guardian_system = bool(event.get('SystemAllegiance', "") == 'Guardian')
                 if guardian_system:
-                    sys.stdout.write(f"Guardian System\t")
+                    sys.stdout.write(f"Guardian System\n{header}")
                     playsound('./sound88.wav')
 
                 system_factions = [f.get('Name','') for f in sorted(event.get('Factions',[{}]),key=lambda X: -X.get('Influence',0))]

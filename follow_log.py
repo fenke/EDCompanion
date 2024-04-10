@@ -228,8 +228,11 @@ def follow_journal(backlog=0, verbose=False):
 
     kb_stop = False
     last_journal = ''
+    
+    # --------------------------------------------------------------
     while not kb_stop:
 
+        # ----------------------------------------------------------
         for event in edc_track_journal(edlogspath, backlog=backlog):
             eventname = event.pop("event")
 
@@ -388,6 +391,8 @@ def follow_journal(backlog=0, verbose=False):
                     if min_d1 < 2000:
                         if len(navi_distances_l1) > 5:
                             sys.stdout.write(f"Distances to L1 between {min_d1} and {max_d1} \n{header}")
+                        elif min_d1 > 200:
+                            pass
                         else:
                             sys.stdout.write(f"Distances to L1: {' / '.join([str(v) for v in navi_distances_l1.values()])} \n{header}")
 

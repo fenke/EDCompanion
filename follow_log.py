@@ -380,6 +380,11 @@ def follow_journal(backlog=0, verbose=False):
 
             elif "NavRoute" in eventname:
                 navi_route = {item.get('StarSystem'):item for item in navroute.edc_navigationroute(edlogspath)}
+                if system_name in navi_route:
+                    navi_system = navi_route.pop(system_name)
+                else:
+                    navi_system = {}
+
                 #navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
                 navi_distances_l1 =  {s:distance_1(i.get('StarPos')) for s, i in navi_route.items()}
 

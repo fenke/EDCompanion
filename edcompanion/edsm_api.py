@@ -80,8 +80,7 @@ def distance_between_systems(s1name,s2name):
 
 def get_systems_in_cube(system, size=100):
     base_url='https://www.edsm.net/api-v1/cube-systems'
-    if not system:
-        return {}
+
     if isinstance(system, str):
         return get_systems_in_cube_by_name(system, size)
 

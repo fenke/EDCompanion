@@ -37,7 +37,13 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         task_queue.put(item=(work_args, work_kwargs), **put_kwargs)
     
     def get_item(wait=False):
-        pass
+        try:
+            item = done_queue.get_nowait()
+            done_queue.task_done()
+        except queue.Empty:
+            item = None
+
+        return item
 
     def workloop():
         nonlocal task_queue, workerfunc, done_queue, stop_event
@@ -54,10 +60,14 @@ def create_threaded_worker(workerfunc, **put_kwargs):
                     task_queue.task_done()
 
                 except queue.Empty:
-                    time.sleep(0.450)
+                    time.sleep(0.150)
             
                 if item:
-                    workerfunc(*item[0], **item[1])
+                    try:
+                        done_queue.put_nowait(workerfunc(*item[0], **item[1]))
+                    except queue.Full:
+                        pass
+
 
             except Exception as x:
                 syslog.exception("Exception: %s", x, exc_info=True, stack_info=True)

@@ -16,7 +16,7 @@ from edcompanion import init_console_logging
 from edcompanion import navroute, events
 from edcompanion.events import edc_track_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
-from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position
+from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position, get_systems_in_cube
 from edcompanion.threadworker import create_threaded_worker
 
 syslog = init_console_logging(__name__)
@@ -137,23 +137,51 @@ fuel_used = []
 sound_queue = create_threaded_worker(original_play_sound)
 #bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
-
+glines={
+   "line_1": {
+      "direction": [
+         0.7694614082861055,
+         0.025650634567776276,
+         0.6381780207000499
+      ],
+      "mean": [
+         -1394.6640000000002,
+         -445.08299999999997,
+         13171.01
+      ]
+   },
+   "line_0": {
+      "direction": [
+         0.9609153520443258,
+         0.002797717724735249,
+         0.2768282120396372
+      ],
+      "mean": [
+         5280.544,
+         -227.47200000000004,
+         1189.0379999999998
+      ]
+   }
+}
 try:
     with open(f"data/guardian/glines.json", 'rt') as jsonfile:
         glines = json.load(jsonfile)
-
-    def distance_0(point):
-        return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['mean']))/np.linalg.norm(glines['line_0']['direction']),2)
-
-    def distance_1(point):
-        return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['mean']))/np.linalg.norm(glines['line_1']['direction']),2)
-
-
 except:
-    def distance_0(*_):
-        return 0
-    def distance_1(*_):
-        return 0
+    pass
+
+def distance_0(point):
+    return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['mean']))/np.linalg.norm(glines['line_0']['direction']),2)
+
+def distance_1(point):
+    return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['mean']))/np.linalg.norm(glines['line_1']['direction']),2)
+
+def nearest_point_on_1(point):
+    dp = np.dot(np.asarray(point)-np.asarray(glines['line_1']['mean']), np.asarray(glines['line_1']['direction']) )
+    return np.round(dp*np.asarray(glines['line_1']['direction']) + np.asarray(glines['line_1']['mean']),1)
+
+def nearest_point_on_0(point):
+    return np.dot(np.asarray(point)-glines['line_0']['mean'], glines['line_0']['direction'] ) + glines['line_0']['mean']
+
 
 def follow_journal(backlog=0, verbose=False):
     sound_queue.start()
@@ -228,7 +256,7 @@ def follow_journal(backlog=0, verbose=False):
 
     kb_stop = False
     last_journal = ''
-    
+
     # --------------------------------------------------------------
     while not kb_stop:
 
@@ -389,6 +417,7 @@ def follow_journal(backlog=0, verbose=False):
                     navi_system = {}
 
                 #navi_distances = {s:np.sqrt(np.sum(np.square(np.asarray(i.get('StarPos'))-starpos))) for s, i in navi_route.items()}
+
                 navi_distances_l1 =  {s:distance_1(i.get('StarPos')) for s, i in navi_route.items()}
 
                 if len(navi_distances_l1) > 0:
@@ -396,8 +425,15 @@ def follow_journal(backlog=0, verbose=False):
                     if min_d1 < 2000:
                         if len(navi_distances_l1) > 5:
                             sys.stdout.write(f"Distances to L1 between {min_d1} and {max_d1} \n{header}")
-                        elif min_d1 > 200:
-                            pass
+                        elif min_d1 > 100:
+                            min_d1_entry = list(filter(lambda k: not navi_distances_l1[k] > min_d1, navi_distances_l1.keys()))[0]
+                            nearest_point = nearest_point_on_1(navi_route.get(min_d1_entry,{}).get('StarPos'))
+                            tsg1 = get_systems_in_cube(list(nearest_point), size=100)
+                            if tsg1:
+                                sys.stdout.write(f"Try aiming at {tsg1[0].get('name')} \n{header}")
+                            else:
+                                sys.stdout.write(f"Try aiming at {np.round(nearest_point,1)} \n{header}")
+
                         else:
                             sys.stdout.write(f"Distances to L1: {' / '.join([str(v) for v in navi_distances_l1.values()])} \n{header}")
 

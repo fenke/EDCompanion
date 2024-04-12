@@ -2,108 +2,108 @@
    "markers": [
       {
          "pin": "yellow",
-         "text": "Center of cluster 0 with 469 guardian sites",
-         "x": 995.7,
-         "y": -146.43,
-         "z": -116.02
+         "text": "cluster 0, distance 8.9\ncentre \t[ 995.7  -146.43 -116.02]\nprojected \t[-877.36078571    4.16179044 -261.30424852]",
+         "x": -877.4,
+         "y": 4.2,
+         "z": -261.3
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 1 with 21 guardian sites",
-         "x": -5508.69,
-         "y": -540.86,
-         "z": 10520.3
+         "text": "cluster 0, distance 496.1\ncentre \t[8655.06 -153.22 2682.14]\nprojected \t[6923.2930102   -32.84087363 2061.96345533]",
+         "x": 6923.3,
+         "y": -32.8,
+         "z": 2062.0
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 2 with 26 guardian sites",
-         "x": 8655.06,
-         "y": -153.22,
-         "z": 2682.14
+         "text": "cluster 0, distance 276.2\ncentre \t[1112.86 -210.37  202.45]\nprojected \t[-682.34996633    3.23675005 -203.22420158]",
+         "x": -682.3,
+         "y": 3.2,
+         "z": -203.2
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 3 with 15 guardian sites",
-         "x": 1112.86,
-         "y": -210.37,
-         "z": 202.45
+         "text": "cluster 0, distance 352.5\ncentre \t[14583.05  -238.23  3564.39]\nprojected \t[12609.90156366   -59.81549289  3755.60534001]",
+         "x": 12609.9,
+         "y": -59.8,
+         "z": 3755.6
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 4 with 19 guardian sites",
-         "x": -9303.99,
-         "y": -403.82,
-         "z": 7928.94
+         "text": "cluster 0, distance 363.8\ncentre \t[1056.05 -389.11 -387.77]\nprojected \t[-895.21111888    4.2464641  -266.62061092]",
+         "x": -895.2,
+         "y": 4.2,
+         "z": -266.6
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 5 with 14 guardian sites",
-         "x": 4954.17,
-         "y": 159.51,
-         "z": 20640.97
+         "text": "cluster 1, distance 522.0\ncentre \t[-5508.69  -540.86 10520.3 ]\nprojected \t[-3503.89696286   -86.44766202 -2732.04051095]",
+         "x": -3503.9,
+         "y": -86.4,
+         "z": -2732.0
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 6 with 22 guardian sites",
-         "x": 1227.25,
-         "y": -705.39,
-         "z": 12334.83
+         "text": "cluster 1, distance 849.0\ncentre \t[-9303.99  -403.82  7928.94]\nprojected \t[-7117.33168807  -175.59782458 -5549.48924235]",
+         "x": -7117.3,
+         "y": -175.6,
+         "z": -5549.5
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 7 with 21 guardian sites",
-         "x": 14583.05,
-         "y": -238.23,
-         "z": 3564.39
+         "text": "cluster 1, distance 2115.8\ncentre \t[ 4954.17   159.51 20640.97]\nprojected \t[7917.08266892  195.32917034 6173.06696211]",
+         "x": 7917.1,
+         "y": 195.3,
+         "z": 6173.1
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 8 with 20 guardian sites",
-         "x": 1056.05,
-         "y": -389.11,
-         "z": -387.77
+         "text": "cluster 1, distance 2205.6\ncentre \t[ 1227.25  -705.39 12334.83]\nprojected \t[1560.6804865    38.50489345 1216.88575862]",
+         "x": 1560.7,
+         "y": 38.5,
+         "z": 1216.9
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 9 with 27 guardian sites",
-         "x": -833.93,
-         "y": -638.18,
-         "z": 13480.76
+         "text": "cluster 1, distance 182.4\ncentre \t[ -833.93  -638.18 13480.76]\nprojected \t[835.79593528  20.6206419  651.68250616]",
+         "x": 835.8,
+         "y": 20.6,
+         "z": 651.7
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 10 with 14 guardian sites",
-         "x": -623.71,
-         "y": -554.08,
-         "z": 13263.77
+         "text": "cluster 1, distance 333.4\ncentre \t[ -623.71  -554.08 13263.77]\nprojected \t[862.59286626  21.28177208 672.5764713 ]",
+         "x": 862.6,
+         "y": 21.3,
+         "z": 672.6
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 11 with 11 guardian sites",
-         "x": -678.35,
-         "y": -322.46,
-         "z": 13350.63
+         "text": "cluster 1, distance 254.3\ncentre \t[ -678.35  -322.46 13350.63]\nprojected \t[874.28063837  21.57013118 681.68960083]",
+         "x": 874.3,
+         "y": 21.6,
+         "z": 681.7
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 12 with 14 guardian sites",
-         "x": -1016.32,
-         "y": -559.56,
-         "z": 13184.65
+         "text": "cluster 1, distance 169.8\ncentre \t[-1016.32  -559.56 13184.65]\nprojected \t[580.08234524  14.31171152 452.29882148]",
+         "x": 580.1,
+         "y": 14.3,
+         "z": 452.3
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 13 with 12 guardian sites",
-         "x": -1123.76,
-         "y": -397.15,
-         "z": 13388.27
+         "text": "cluster 1, distance 108.6\ncentre \t[-1123.76  -397.15 13388.27]\nprojected \t[614.48103707  15.16039129 479.11999248]",
+         "x": 614.5,
+         "y": 15.2,
+         "z": 479.1
       },
       {
          "pin": "yellow",
-         "text": "Center of cluster 14 with 5 guardian sites",
-         "x": -1039.31,
-         "y": -488.84,
-         "z": 13616.98
+         "text": "cluster 1, distance 217.6\ncentre \t[-1039.31  -488.84 13616.98]\nprojected \t[776.43693601  19.15614487 605.39941267]",
+         "x": 776.4,
+         "y": 19.2,
+         "z": 605.4
       }
    ]
 }

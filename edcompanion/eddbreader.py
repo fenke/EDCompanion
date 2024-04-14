@@ -33,17 +33,14 @@ def edc_dbfilereader(filename, verbose=False):
             chunk = jsonfile.readlines(chunksize)
             if chunk:
                 for line in chunk:
-                    if len(firstline) < 5:
-                        firstline = line
+                    if len(line) < 5:
                         continue
 
-                    if len(line) < 5:
-                        yield json.loads(firstline)
-                    else:
-                        yield json.loads(firstline[0:-2])
+                    yield json.loads(line.rstrip(',\n\r '))
 
                     system_count += 1
-                    firstline = line
+
+                yield {}
 
                 sys.stdout.write(f"\r{count}/{est_count}\t{100*count/est_count:3.2f}%, {int(system_count / (time.process_time() - start)):6} /s, {system_count:9} systems, {((est_count - count) * (time.process_time() - start)/count):5.1f} seconds remaining")
 
@@ -80,6 +77,7 @@ def edc_dbfile_process(filename, process_chunk, verbose=False):
                     item = json.loads(line[0:-2]) if line[-2] == "," else json.loads(line)
                     data.append(item)
                     system_count += 1
+
                 process_chunk(data)
                 sys.stdout.write(f"\r{count}/{est_count}\t{100*count/est_count:3.2f}%, {int(system_count / (time.process_time() - start)):6} /s, {system_count:9} systems, {((est_count - count) * (time.process_time() - start)/count):5.1f} seconds remaining")
 

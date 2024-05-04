@@ -166,6 +166,7 @@ glines={
 try:
     with open(f"data/guardian/glines.json", 'rt') as jsonfile:
         glines = json.load(jsonfile)
+    print(f"Load glines from disk...")
 except:
     pass
 

@@ -40,7 +40,7 @@ def edc_dbfilereader(filename, verbose=False):
 
                     system_count += 1
 
-                yield {}
+                #yield {}
 
                 sys.stdout.write(f"\r{count}/{est_count}\t{100*count/est_count:3.2f}%, {int(system_count / (time.process_time() - start)):6} /s, {system_count:9} systems, {((est_count - count) * (time.process_time() - start)/count):5.1f} seconds remaining")
 
@@ -52,10 +52,10 @@ def edc_dbfilereader(filename, verbose=False):
     sys.stdout.write(f"\n{ (time.process_time() - start)} seconds {system_count} systems, per system {round(1000000*tpl,2)} us")
 
 
-def edc_dbfile_process(filename, process_chunk, verbose=False):
+async def edc_dbfile_process(filename, process_chunk, verbose=False):
     """Opens file and calls process_chunk to process batches of items"""
     filesize=Path(filename).stat().st_size
-    chunksize = 64 * 1024 * 1024
+    chunksize = 16 * 1024 * 1024
     est_count = int(8*filesize/chunksize) + 1
     print(f"Reading {filename}, {round(filesize/(1024*1024),1)} Mb in approx {est_count} chunks")
 
@@ -78,7 +78,7 @@ def edc_dbfile_process(filename, process_chunk, verbose=False):
                     data.append(item)
                     system_count += 1
 
-                process_chunk(data)
+                await process_chunk(data)
                 sys.stdout.write(f"\r{count}/{est_count}\t{100*count/est_count:3.2f}%, {int(system_count / (time.process_time() - start)):6} /s, {system_count:9} systems, {((est_count - count) * (time.process_time() - start)/count):5.1f} seconds remaining")
 
             else:

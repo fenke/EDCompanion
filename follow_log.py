@@ -144,7 +144,7 @@ glines={
          0.025650634567776276,
          0.6381780207000499
       ],
-      "mean": [
+      "support": [
          -1394.6640000000002,
          -445.08299999999997,
          13171.01
@@ -156,7 +156,7 @@ glines={
          0.002797717724735249,
          0.2768282120396372
       ],
-      "mean": [
+      "support": [
          5280.544,
          -227.47200000000004,
          1189.0379999999998
@@ -170,17 +170,17 @@ except:
     pass
 
 def distance_0(point):
-    return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['mean']))/np.linalg.norm(glines['line_0']['direction']),2)
+    return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['support']))/np.linalg.norm(glines['line_0']['direction']),2)
 
 def distance_1(point):
-    return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['mean']))/np.linalg.norm(glines['line_1']['direction']),2)
+    return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['support']))/np.linalg.norm(glines['line_1']['direction']),2)
 
 def nearest_point_on_1(point):
-    dp = np.dot(np.asarray(point)-np.asarray(glines['line_1']['mean']), np.asarray(glines['line_1']['direction']) )
-    return np.round(dp*np.asarray(glines['line_1']['direction']) + np.asarray(glines['line_1']['mean']),1)
+    dp = np.dot(np.asarray(point)-np.asarray(glines['line_1']['support']), np.asarray(glines['line_1']['direction']) )
+    return np.round(dp*np.asarray(glines['line_1']['direction']) + np.asarray(glines['line_1']['support']),1)
 
 def nearest_point_on_0(point):
-    return np.dot(np.asarray(point)-glines['line_0']['mean'], glines['line_0']['direction'] ) + glines['line_0']['mean']
+    return np.dot(np.asarray(point)-glines['line_0']['support'], glines['line_0']['direction'] ) + glines['line_0']['support']
 
 
 def follow_journal(backlog=0, verbose=False):

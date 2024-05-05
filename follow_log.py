@@ -17,6 +17,7 @@ from edcompanion import navroute, events
 from edcompanion.events import edc_track_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
 from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position, get_systems_in_cube
+from edcompanion.calctools import *
 from edcompanion.threadworker import create_threaded_worker
 
 syslog = init_console_logging(__name__)
@@ -138,30 +139,30 @@ sound_queue = create_threaded_worker(original_play_sound)
 #bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
 glines={
-   "line_1": {
-      "direction": [
+   "line_1": NT_Line(**{
+      "direction": np.asarray([
          0.7694614082861055,
          0.025650634567776276,
          0.6381780207000499
-      ],
-      "support": [
+      ]),
+      "support": np.asarray([
          -1394.6640000000002,
          -445.08299999999997,
          13171.01
-      ]
-   },
-   "line_0": {
-      "direction": [
+      ])
+   }),
+   "line_0": NT_Line(**{
+      "direction": np.asarray([
          0.9609153520443258,
          0.002797717724735249,
          0.2768282120396372
-      ],
-      "support": [
+      ]),
+      "support": np.asarray([
          5280.544,
          -227.47200000000004,
          1189.0379999999998
-      ]
-   }
+      ])
+   })
 }
 try:
     with open(f"data/guardian/glines.json", 'rt') as jsonfile:
@@ -170,6 +171,12 @@ try:
 except:
     pass
 
+def line_distances(point):
+    return {
+        l:distance_point_to_line(point, s.direction, s.support)
+        for l,s in glines.items()
+    }
+    
 def distance_0(point):
     return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['support']))/np.linalg.norm(glines['line_0']['direction']),2)
 

@@ -19,9 +19,9 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         start() starts the thread-loop
         put(item, **work_args) puts item and optional keyword arguments
             on the queue for processing by workerfunc()"""
-    
 
-    syslog.info("Creating threaded worker for %s", str(workerfunc.__code__))
+
+    #syslog.info("Creating threaded worker for %s", str(workerfunc.__code__))
 
     # utility factory class
     class workerfactory(dict):
@@ -35,7 +35,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
     def put_item(*work_args, **work_kwargs):
         nonlocal task_queue
         task_queue.put(item=(work_args, work_kwargs), **put_kwargs)
-    
+
     def get_item(wait=False):
         try:
             item = done_queue.get_nowait()
@@ -48,7 +48,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
     def workloop():
         nonlocal task_queue, workerfunc, done_queue, stop_event
         # open contexts for redirection of stdout and stderr into logging
-        syslog.debug("Starting thread loop for %s", str(workerfunc.__code__))
+        #syslog.debug("Starting thread loop for %s", str(workerfunc.__code__))
 
         # indefinately keep getting new items from the queue to process
         while not stop_event.is_set():
@@ -61,7 +61,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
 
                 except queue.Empty:
                     time.sleep(0.150)
-            
+
                 if item:
                     try:
                         done_queue.put_nowait(workerfunc(*item[0], **item[1]))
@@ -80,7 +80,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         nonlocal task_processor
         task_processor.start()
 
-    def stop(): 
+    def stop():
         nonlocal stop_event
         syslog.debug('Sending stop to thread for %s\n', str(workerfunc.__code__))
         stop_event.set()

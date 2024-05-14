@@ -136,6 +136,7 @@ saascan = {}
 fuel_used = []
 
 sound_queue = create_threaded_worker(original_play_sound)
+prefetch_queue = create_threaded_worker(get_edsm_info)
 #bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
 glines={
@@ -176,7 +177,7 @@ def line_distances(point):
         l:distance_point_to_line(point, s.direction, s.support)
         for l,s in glines.items()
     }
-    
+
 def distance_0(point):
     return round(np.linalg.norm(np.cross(glines['line_0']['direction'], np.asarray(point)-glines['line_0']['support']))/np.linalg.norm(glines['line_0']['direction']),2)
 
@@ -184,6 +185,8 @@ def distance_1(point):
     return round(np.linalg.norm(np.cross(glines['line_1']['direction'], np.asarray(point)-glines['line_1']['support']))/np.linalg.norm(glines['line_1']['direction']),2)
 
 def nearest_point_on_1(point):
+    #return project_point_on_line(np.asarray(point), **{t:np.asarray(a) for t,a in glines['line_1'].items()})
+
     dp = np.dot(np.asarray(point)-np.asarray(glines['line_1']['support']), np.asarray(glines['line_1']['direction']) )
     return np.round(dp*np.asarray(glines['line_1']['direction']) + np.asarray(glines['line_1']['support']),1)
 
@@ -191,7 +194,40 @@ def nearest_point_on_0(point):
     return np.dot(np.asarray(point)-glines['line_0']['support'], glines['line_0']['direction'] ) + glines['line_0']['support']
 
 
+current_sector = ''
+sector = {}
+sectors = {}
+
+def load_sector(system_name):
+    global current_sector, sector, sectors
+    sector_name = system_name.split(' ')[0]
+    sector_filename = os.path.join(os.getcwd(), 'data', 'sectors', sector_name + '.json')
+
+    if current_sector != sector_filename:
+        if sector:
+            with open(current_sector, 'wt') as jsonfile:
+                json.dump(sector, jsonfile, indent=3)
+
+        current_sector = sector_filename
+
+        if os.path.exists(sector_filename):
+            with open(sector_filename, 'rt') as jsonfile:
+                sector = json.load(jsonfile)
+        else:
+            sector = {}
+
+        sectors[sector_name] = sector
+
+    return sector
+
+def get_sector_info(system_name):
+    s = load_sector(system_name)
+    return s.get(system_name, {})
+
+
 def follow_journal(backlog=0, verbose=False):
+    global current_sector, sector, sectors
+
     sound_queue.start()
     def playsound(*args, **kwargs):
         if verbose:
@@ -236,9 +272,6 @@ def follow_journal(backlog=0, verbose=False):
             signals=json.load(jsonfile)
     except Exception as x:
         sys.stdout.write(f"Error {x}\n")
-
-    current_sector = ''
-    sector = {}
 
     #systems = {}
     # try:
@@ -320,12 +353,15 @@ def follow_journal(backlog=0, verbose=False):
                     else:
                         sector = {}
 
+                    sectors[sector_name] = sector
+
 
                 if system_name not in sector:
                     body_id = str(event.get('BodyID',0))
                     sector[system_name] = dict(
                         StarPos=event.get('StarPos',[]),
                         bodies={body_id:dict(Body=event.get('Body'), BodyType=event.get('BodyType'))},
+                        created=timestamp.isoformat()
                         #stars={event.get('BodyID',0):{}} if bool(event.get('BodyType','') == 'Star') else {}
                     )
                     sector[system_name]['stars'] = {i:b for i,b in sector[system_name]['bodies'].items() if b.get('BodyType','') == 'Star'}
@@ -433,7 +469,7 @@ def follow_journal(backlog=0, verbose=False):
                     if min_d1 < 2000:
                         if len(navi_distances_l1) > 5:
                             sys.stdout.write(f"Distances to L1 between {min_d1} and {max_d1} \n{header}")
-                        elif min_d1 > 100:
+                        elif min_d1 > 30:
                             min_d1_entry = list(filter(lambda k: not navi_distances_l1[k] > min_d1, navi_distances_l1.keys()))[0]
                             nearest_point = nearest_point_on_1(navi_route.get(min_d1_entry,{}).get('StarPos'))
                             tsg1 = get_systems_in_cube(list(nearest_point), size=100)
@@ -453,12 +489,18 @@ def follow_journal(backlog=0, verbose=False):
                 #sys.stdout.write(f"\n")
 
             elif eventname == 'StartJump' and event.get("JumpType") == "Hyperspace":
+                prefetch_queue.put(str(event.get('StarSystem','')))
                 if system_name in navi_route:
                     navi_route.pop(system_name)
                 sys.stdout.write(f"{event.get('StarSystem',''):25} | class {event.get('StarClass','')}\n{header}") # FuelCapacity
 
             elif eventname == 'FSDTarget':
-                sys.stdout.write(f"{event.get('Name',''):25} | class {event.get('StarClass','')}")
+                prefetch_queue.put(str(event.get('Name','')))
+                sys.stdout.write(
+                    f"{event.get('Name',''):25} | class {event.get('StarClass','')}"
+                )
+                if(get_sector_info(event.get('Name',''))):
+                    sys.stdout.write(f" (been there)")
 
                 risk = get_edsm_system_risk(event.get('Name',''))
                 if risk > 1:

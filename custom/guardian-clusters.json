@@ -2,28 +2,28 @@
    "markers": [
       {
          "pin": "red",
-         "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81\nSite Type           : Alpha\nSurface Temperature : 246\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: nan\nVolcanism           : No volcanism\nOrbital Period      : 8.374837745\nRegion (Journal)    : Inner Orion Spur\nGravity             : 0.3059238068\nRotational Period   : 8.524807315",
+         "text": "type                : Ruins\nSiteId              : 361\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           : 1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : CodexNecro81\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: nan\nRotational Period   : 8.524807315\nOrbital Period      : 8.374837745\nGravity             : 0.3059238068\nVolcanism           : No volcanism\nSurface Temperature : 246\nRegion (Journal)    : Inner Orion Spur\nSite Type           : Alpha",
          "x": 573.59375,
          "y": -339.46875,
          "z": -1167.65625
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix\nSite Type           : Squid\nSurface Temperature : 246\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: nan\nVolcanism           : No volcanism\nOrbital Period      : 8.374837745\nRegion (Journal)    : Inner Orion Spur\nGravity             : 0.3059238068\nRotational Period   : 8.524807315",
+         "text": "type                : Structures\nSiteId              : 186\nSystem Name         : TRAPEZIUM SECTOR YU-X C1-2\nx                   : 573.59375\ny                   : -339.46875\nz                   : -1167.65625\nPrimary Star        : K (Yellow-Orange) Star\nBody Name           :  1 A\nBody Sub Type       : Rocky body\nDistance To Arrival : 253\nDiscovered By       : Namix\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: nan\nRotational Period   : 8.524807315\nOrbital Period      : 8.374837745\nGravity             : 0.3059238068\nVolcanism           : No volcanism\nSurface Temperature : 246\nRegion (Journal)    : Inner Orion Spur\nSite Type           : Squid",
          "x": 573.59375,
          "y": -339.46875,
          "z": -1167.65625
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 200\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nSite Type           : Stickyhand\nSurface Temperature : 58\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: 0.001431\nVolcanism           : No volcanism\nOrbital Period      : 11.49832809\nRegion (Journal)    : Unknown\nGravity             : 0.1029534669\nRotational Period   : 11.49914532",
+         "text": "type                : Structures\nSiteId              : 200\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: 0.001431\nRotational Period   : 11.49914532\nOrbital Period      : 11.49832809\nGravity             : 0.1029534669\nVolcanism           : No volcanism\nSurface Temperature : 58\nRegion (Journal)    : Unknown\nSite Type           : Stickyhand",
          "x": 1077.375,
          "y": 400.5625,
          "z": -993.375
       },
       {
          "pin": "red",
-         "text": "type                : Structures\nSiteId              : 201\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nSite Type           : Bear\nSurface Temperature : 58\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: 0.001431\nVolcanism           : No volcanism\nOrbital Period      : 11.49832809\nRegion (Journal)    : Unknown\nGravity             : 0.1029534669\nRotational Period   : 11.49914532",
+         "text": "type                : Structures\nSiteId              : 201\nSystem Name         : WREGOE BU-Y B2-0\nx                   : 1077.375\ny                   : 400.5625\nz                   : -993.375\nPrimary Star        : M (Red dwarf) Star\nBody Name           :  1 C\nBody Sub Type       : Icy body\nDistance To Arrival : 1216\nDiscovered By       : Marina Oatmeal\nRegion (Calculated) : Inner Orion Spur\nOrbital Eccentricity: 0.001431\nRotational Period   : 11.49914532\nOrbital Period      : 11.49832809\nGravity             : 0.1029534669\nVolcanism           : No volcanism\nSurface Temperature : 58\nRegion (Journal)    : Unknown\nSite Type           : Bear",
          "x": 1077.375,
          "y": 400.5625,
          "z": -993.375
@@ -132,6 +132,13 @@
          "x": -1039.31,
          "y": -488.84,
          "z": 13616.98
+      },
+      {
+         "pin": "cyan",
+         "text": "Center of cluster 15 with 5 guardian sites",
+         "x": -898.55,
+         "y": -315.94,
+         "z": 13391.51
       }
    ]
 }

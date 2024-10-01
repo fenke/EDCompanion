@@ -9,6 +9,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 import requests
+import apscheduler
 
 from playsound import playsound as original_play_sound
 

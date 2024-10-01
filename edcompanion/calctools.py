@@ -4,9 +4,16 @@ from collections import namedtuple
 NT_Line = namedtuple('line_nd',['direction', 'support'])
 
 def project_point_on_line(point, direction, support):
+
+    dp = np.dot(np.asarray(point)-np.asarray(support), np.asarray(direction) )
+    return np.round(dp*np.asarray(direction) + np.asarray(support),1)
+
     """Projects a point on a line"""
-    dp = np.dot(point-support, direction)
-    return direction * dp
+    if isinstance(point, np.ndarray) and isinstance(direction, np.ndarray):
+        dp = np.dot(point-support, direction)
+        return direction * dp + support
+    else:
+        return(np.asarray(point), np.asarray(direction), np.asarray(support))
 
 def distance_point_to_line(point, direction, support):
     """Calculate distance between point and a line"""

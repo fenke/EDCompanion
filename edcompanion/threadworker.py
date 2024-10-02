@@ -50,6 +50,8 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         # open contexts for redirection of stdout and stderr into logging
         #syslog.debug("Starting thread loop for %s", str(workerfunc.__code__))
 
+        sleepfor = 0.05
+        sleepmax = 0.5
         # indefinately keep getting new items from the queue to process
         while not stop_event.is_set():
             try:
@@ -58,13 +60,18 @@ def create_threaded_worker(workerfunc, **put_kwargs):
                     # by default queue.get() waits for new items
                     item = task_queue.get_nowait()
                     task_queue.task_done()
+                    sleepfor = 0.05
 
                 except queue.Empty:
-                    time.sleep(0.150)
+                    time.sleep(sleepfor)
+                    sleepfor = min(sleepfor * 1.2, sleepmax)
 
                 if item:
                     try:
-                        done_queue.put_nowait(workerfunc(*item[0], **item[1]))
+                        result = workerfunc(*item[0], **item[1])
+                        if not result is None:
+                            done_queue.put_nowait(result)
+
                     except queue.Full:
                         pass
 
@@ -88,5 +95,6 @@ def create_threaded_worker(workerfunc, **put_kwargs):
     return workerfactory(
         start=start_processing,
         stop=stop,
-        put=put_item)
+        put=put_item,
+        get=get_item)
 

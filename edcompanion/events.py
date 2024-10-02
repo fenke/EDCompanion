@@ -15,6 +15,12 @@ from functools import reduce
 def loads_jsonline(line):
     return json.loads(line[0:-2]) if line[-2] == "," else json.loads(line)
 
+def list_journal_files(journalpath):
+    return sorted(
+            [os.path.join(journalpath, f) for f in os.listdir(journalpath) if 'Journal' in f.split('.')[0] and '.log' in f],
+            key=lambda f:f.replace('-', '').replace('Journal.20', 'Journal.').replace('T','')
+        )
+
 def edc_track_journal(journalpath, backlog=0):
     '''Iterable for Journal events'''
 

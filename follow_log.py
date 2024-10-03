@@ -10,12 +10,13 @@ import numpy as np
 import pandas as pd
 import requests
 import apscheduler
+import ntpath
 
 from playsound import playsound as original_play_sound
 
 from edcompanion import init_console_logging
 from edcompanion import navroute, events
-from edcompanion.events import edc_track_journal
+from edcompanion.events import edc_track_journal, edc_list_journals, edc_read_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
 from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position, get_systems_in_cube
 from edcompanion.calctools import *
@@ -138,6 +139,8 @@ fuel_used = []
 
 sound_queue = create_threaded_worker(original_play_sound)
 prefetch_queue = create_threaded_worker(get_edsm_info)
+
+
 #bigtasks_queue = create_threaded_worker(lambda F, *args, **kwargs: F(*arg, **kwargs))
 
 glines={
@@ -299,11 +302,69 @@ def follow_journal(backlog=0, verbose=False):
     kb_stop = False
     last_journal = ''
 
+    logfiles = edc_list_journals(edlogspath)
+    logfiles = logfiles[-(1+min(backlog, len(logfiles)-1)):]
+    syslog.info(f"Reading {len(logfiles)} journals")
+
+    send_queue = None
+
     # --------------------------------------------------------------
-    while not kb_stop:
+    for logfile in logfiles:
+
+        if kb_stop:
+            break
+        
+        if not send_queue is None:
+            send_queue.stop()
+            send_queue.join()
+
+        journal_id = None
+        def send_event(event):
+            nonlocal journal_id
+            url = "http://localhost:8080/event"
+            token = os.getenv("USR_TOKEN")
+            if journal_id is None:
+                req = requests.post(
+                    url,
+                    params=dict(
+                        token=token,
+                        filename=ntpath.basename(logfile)
+                    ),
+                    json=event
+                )
+
+                if req.status_code == 200:
+                    journal_id = req.json()['journal_id']     
+
+            if journal_id:
+                req = requests.post(
+                    url,
+                    params=dict(
+                        token=token,
+                        journal_id=journal_id
+                    ),
+                    json=event
+
+                )
+
+                if req.status_code == 200:
+                    journal_id = req.json()['journal_id']
+
+            else:
+                syslog.error(f"Failed to send event {event}")
+                return event
+
+        send_queue = create_threaded_worker(send_event)
+        send_queue.start()
 
         # ----------------------------------------------------------
-        for event in edc_track_journal(edlogspath, backlog=backlog):
+        for event in edc_read_journal(logfile, notail=(backlog > 0)):
+            send_queue.put(event.copy())
+            # send_failed = send_queue.get()
+            # if send_failed is not None:
+            #     syslog.error(f"Failed to send event {send_failed}")
+            #     break
+
             eventname = event.pop("event")
 
             # Finding guardian things to monitor --------------------
@@ -389,8 +450,7 @@ def follow_journal(backlog=0, verbose=False):
 
             elif eventname == 'JournalFinished':
                 sys.stdout.write(f"Journal read {event.get('filename')}\n")
-                last_journal = event.get(event.get('filename',''))
-                kb_stop = True
+                break
 
             elif eventname == 'Fileheader':
                 sys.stdout.write(f"{'Odyssey' if event.get('Odyssey', False) else 'Horizons' }\n{header}")
@@ -724,9 +784,15 @@ def follow_journal(backlog=0, verbose=False):
 
                 sys.stdout.write(f"Signal at {event.get('BodyName', event.get('SignalName', '??'))} {', '.join([s.get('Type_Localised') for s in event.get('Signals',[])])} \n{header}") # FuelCapacity
 
-        sys.stdout.write(f"\nBye bye\n")
+        send_queue.stop()
+        sys.stdout.write(f"\nJoining send queue ...\n")
+        send_queue.join()
+
+        sys.stdout.write(f"\nDone with {logfile} ... Bye bye\n\n")
 
     sound_queue.stop()
+    sys.stdout.write(f"\nJoining sound queue ...\n")
+    sound_queue.join()
 
     if sector and current_sector:
         try:
@@ -804,7 +870,7 @@ def follow_journal(backlog=0, verbose=False):
 
 if __name__ == "__main__":
     try:
-        follow_journal(backlog=0,verbose=True)
+        follow_journal(backlog=2,verbose=True)
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
     print(f"\nDone")

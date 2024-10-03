@@ -36,7 +36,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         nonlocal task_queue
         task_queue.put(item=(work_args, work_kwargs), **put_kwargs)
 
-    def get_item(wait=False):
+    def get_item():
         try:
             item = done_queue.get_nowait()
             done_queue.task_done()
@@ -93,8 +93,9 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         stop_event.set()
 
     return workerfactory(
-        start=start_processing,
+        start=task_processor.start,
         stop=stop,
         put=put_item,
-        get=get_item)
+        get=get_item,
+        join=task_processor.join)
 

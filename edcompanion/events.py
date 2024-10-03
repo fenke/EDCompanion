@@ -49,49 +49,47 @@ def edc_track_journal(journalpath, backlog=0):
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
         pass
 
-def edc_read_journal(journals):
+def edc_read_journal(journal, notail=False):
     syslog = logging.getLogger(f"root.{__name__}")
-
-    if not isinstance(journals, list):
-        return edc_read_journal([journals])
-    last_journal = journals[-1]
-    journal = journals[0]
+    
     try:
-        for journal in journals:
-            syslog.debug(f"\nReading journal: {journal}")
-            with open(journal, encoding="utf-8") as journalfile:
-                # yield dict(
-                #     event='Journal',
-                #     timestamp=datetime.datetime.utcnow().isoformat(),
-                #     filename=f"{ntpath.basename(journal)}"
+        syslog.info(f"\nReading journal: {journal}")
+        with open(journal, encoding="utf-8") as journalfile:
+            # yield dict(
+            #     event='Journal',
+            #     timestamp=datetime.datetime.utcnow().isoformat(),
+            #     filename=f"{ntpath.basename(journal)}"
 
-                # )
-                while True:# not shutdown_seen:
-                    line = journalfile.readline()
-                    if not line:
-                        if journal != last_journal:
-                            break
-                        time.sleep(0.3)
-                        continue
-
-                    if len(line) < 5:
-                        continue
-                    try:
-
-                        event = json.loads(line)
-                    except json.decoder.JSONDecodeError as JX:
-                        print(JX)
-                        print(line)
-                        return
-
-                    if event.get('event', '') == 'Shutdown':
-                        syslog.debug(f"SHUTDOWN {event.get('timestamp'):22} {journal}")
+            # )
+            while True:# not shutdown_seen:
+                line = journalfile.readline()
+                if not line:
+                    if notail:
                         break
+                    
+                    time.sleep(0.3)
+                    continue
 
-                    yield event
+                if len(line) < 5:
+                    continue
+
+                try:
+                    event = json.loads(line)
+
+                except json.decoder.JSONDecodeError as JX:
+                    print(JX)
+                    print(line)
+                    return
+
+                if event.get('event', '') == 'Shutdown':
+                    syslog.info(f"SHUTDOWN {event.get('timestamp'):22} {journal}")
+                    break
+
+                yield event
+        
         yield dict(
             event='JournalFinished',
-            timestamp=datetime.datetime.utcnow().isoformat(),
+            timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             filename=f"{ntpath.basename(journal)}"
         )
 

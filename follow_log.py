@@ -18,7 +18,7 @@ from edcompanion import init_console_logging
 from edcompanion import navroute, events
 from edcompanion.events import edc_track_journal, edc_list_journals, edc_read_journal
 from edcompanion.timetools import make_datetime, make_naive_utc
-from edcompanion.edsm_api import get_edsm_info, distance_between_systems, get_edsm_system_risk, get_commander_position, get_systems_in_cube
+from edcompanion.edsm_api import get_edsm_info, distance_between_systems, post_journal_item, get_edsm_system_risk, get_commander_position, get_systems_in_cube
 from edcompanion.calctools import *
 from edcompanion.threadworker import create_threaded_worker
 
@@ -313,46 +313,33 @@ def follow_journal(backlog=0, verbose=False):
 
         if kb_stop:
             break
-        
+
         if not send_queue is None:
             send_queue.stop()
             send_queue.join()
 
-        journal_id = None
+        edsm_last_activity = None
+        edsm_params = dict(
+            commander_name=os.getenv("EDSM_USER"),
+            token=os.getenv(key="EDSM_TOKEN"),
+            software_info={
+                "fromSoftware":"EDCompanion",
+                "fromSoftwareVersion":"1.0",
+            }
+        )
+
         def send_event(event):
-            nonlocal journal_id
-            url = "http://localhost:8080/event"
-            token = os.getenv("USR_TOKEN")
-            if journal_id is None:
-                req = requests.post(
-                    url,
-                    params=dict(
-                        token=token,
-                        filename=ntpath.basename(logfile)
-                    ),
-                    json=event
-                )
+            nonlocal edsm_last_activity, edsm_params
 
-                if req.status_code == 200:
-                    journal_id = req.json()['journal_id']     
+            if not edsm_last_activity:
+                response = get_commander_position(commander_name=os.getenv("EDSM_USER"), token=os.getenv(key="EDSM_TOKEN"))
 
-            if journal_id:
-                req = requests.post(
-                    url,
-                    params=dict(
-                        token=token,
-                        journal_id=journal_id
-                    ),
-                    json=event
+                if response:
+                    edsm_last_activity = response.get('dateLastActivity', edsm_last_activity)
 
-                )
-
-                if req.status_code == 200:
-                    journal_id = req.json()['journal_id']
-
-            else:
-                syslog.error(f"Failed to send event {event}")
-                return event
+            response = post_journal_item(event, **edsm_params)
+            if response and response.get('msg') != 'OK':
+                return response
 
         send_queue = create_threaded_worker(send_event)
         send_queue.start()
@@ -364,6 +351,12 @@ def follow_journal(backlog=0, verbose=False):
             # if send_failed is not None:
             #     syslog.error(f"Failed to send event {send_failed}")
             #     break
+            send_errors = 0
+            while send_queue.get_return() is not None:
+                send_errors += 1
+                if send_errors > 1:
+                    syslog.error(f"Failed to send events")
+                    break
 
             eventname = event.pop("event")
 
@@ -454,6 +447,10 @@ def follow_journal(backlog=0, verbose=False):
 
             elif eventname == 'Fileheader':
                 sys.stdout.write(f"{'Odyssey' if event.get('Odyssey', False) else 'Horizons' }\n{header}")
+                edsm_params['software_info'].update(dict(
+                    fromGameVersion=event.get("gameversion"),
+                    fromGameBuild=event.get("build"),
+                ))
 
             if 'Signals' in event:
                 _signals = event.get('Signals', [])
@@ -870,7 +867,7 @@ def follow_journal(backlog=0, verbose=False):
 
 if __name__ == "__main__":
     try:
-        follow_journal(backlog=2,verbose=True)
+        follow_journal(backlog=0,verbose=True)
     except KeyboardInterrupt as kbi:
         syslog.info(f"Keyboard Interrupt {kbi.info()}")
     print(f"\nDone")

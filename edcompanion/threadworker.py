@@ -96,6 +96,6 @@ def create_threaded_worker(workerfunc, **put_kwargs):
         start=task_processor.start,
         stop=stop,
         put=put_item,
-        get=get_item,
+        get_return=get_item,
         join=task_processor.join)
 

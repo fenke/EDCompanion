@@ -1,0 +1,35 @@
+
+###
+GET https://www.edsm.net/api-journal-v1/discard
+
+
+###
+GET https://www.edsm.net/api-logs-v1/get-position?commanderName={{edsm-user}}&apiKey={{edsm-token}}&showCoordinates=1
+
+###
+POST {{edsm-journal-api}}
+content-type: application/json
+
+{
+    "commanderName":"{{edsm-user}}",
+    "apiKey":"{{edsm-token}}",
+    "fromSoftware":"EDCompanion",
+    "fromSoftwareVersion":"1.0",
+    "fromGameVersion":"4.0.0.1809",
+    "fromGameBuild":"r305601/r0 ",
+    "message":{"timestamp": "2024-09-25T21:35:36Z", "event": "Commander", "FID": "F9569960", "Name": "immerlicht"}
+}
+
+###
+POST {{edsm-journal-api}}
+content-type: application/json
+
+{
+    "commanderName":"{{edsm-user}}",
+    "apiKey":"{{edsm-token}}",
+    "fromSoftware":"EDCompanion",
+    "fromSoftwareVersion":"1.0",
+    "fromGameVersion":"4.0.0.1809",
+    "fromGameBuild":"r305601/r0 ",
+    "message":{ "timestamp":"2023-01-27T21:46:46Z", "event":"Location", "Latitude":51.218628, "Longitude":89.093658, "DistFromStarLS":2113.251475, "Docked":false, "Taxi":false, "Multicrew":false, "StarSystem":"Synuefe NL-N c23-4", "SystemAddress":1184840454858, "StarPos":[860.12500,-124.59375,-61.06250], "SystemAllegiance":"Guardian", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Synuefe NL-N c23-4 B 3", "BodyID":18, "BodyType":"Planet" }
+}

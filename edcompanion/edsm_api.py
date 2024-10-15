@@ -21,6 +21,14 @@ def get_commander_position(commandername, token):
     else:
         return {}
 
+def get_api_discarded():
+    req = requests.get('https://www.edsm.net/api-journal-v1/discard')
+    if req.status_code == 200:
+        record = req.json()
+        return record if record else {}
+    else:
+        return {}
+
 @lru_cache(512)
 def get_edsm_info(systemname, verbose=True):
     '''Retrieves information about a named system. '''

@@ -7,6 +7,7 @@ import psutil
 import json
 import re
 import uuid
+import hashlib
 import uvicorn
 import falcon
 import falcon.asgi
@@ -15,6 +16,14 @@ from falcon.errors import HTTPInternalServerError
 from edcompanion.timetools import make_datetime, make_naive_utc
 from edcompanion.threadworker import create_threaded_worker
 
+
+logging.basicConfig(
+    format="%(asctime)s.%(msecs)03d \t%(threadName)s\t%(name)s\t%(lineno)d\t%(levelname)s\t%(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+    level=logging.INFO
+)
+
+logging.captureWarnings(True)
 
 syslog = logging.getLogger(__name__)
 
@@ -157,14 +166,17 @@ class EventReceiverEndpoint(object):
 
             journal_id = self.regex_alphanum.sub('_', str(req.get_param("journal_id", default='')))
             if not journal_id:
-                journal_id = str(uuid.uuid4())
+                data = await req.stream.read()
+                journal_id = hashlib.md5(data).hexdigest()
+                events = json.loads(data.decode('utf-8'))
                 self.journals[journal_id] = dict(
                     journal_name = self.regex_alphanum.sub('_', str(req.get_param("filename"))),
-                    journal_path = None,
-                    last_event_time = make_datetime('2000-01-01T00:00:00Z'),
-                    player_id = None,
-                    header = []
+                    last_event_time = make_datetime(events[1].get("timestamp")),
+                    player_id = self.regex_alphanum.sub('_', str(events[1].get('FID'))),
+                    header = events
                 )
+                journal['journal_path'] = os.path.join(self.logpath, str(journal['player_id']), journal['journal_name'])
+
             else:
                 syslog.info(f"Using journal_id {journal_id}")
                 journal_id = str(uuid.UUID(journal_id))
@@ -192,9 +204,8 @@ class EventReceiverEndpoint(object):
                 print(f"Journal path: {journal['journal_path']}")
                 os.makedirs(os.path.join(self.logpath, str(journal['player_id'])), exist_ok=True)
                 with open(os.path.join(journal['journal_path']), "w", encoding="utf-8") as f:
-                    for e in journal['header']:
-                        f.write(json.dumps(e) + "\n")
-                journal['headers'] = []
+                    f.writelines(journal['header'])
+                    journal['headers'] = []
 
             else:
                 self.write_queue.put(journal, event)

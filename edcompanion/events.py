@@ -81,12 +81,12 @@ def edc_read_journal(journal, notail=False):
                     print(line)
                     return
 
+                yield event
+        
                 if event.get('event', '') == 'Shutdown':
                     syslog.info(f"SHUTDOWN {event.get('timestamp'):22} {journal}")
                     break
 
-                yield event
-        
         yield dict(
             event='JournalFinished',
             timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),

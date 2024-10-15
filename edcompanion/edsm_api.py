@@ -4,14 +4,14 @@
 
 from functools import lru_cache
 import requests
-import os
+import os, time
 import numpy as np
 
-def get_commander_position(commandername, token):
+def get_commander_position(commander_name=os.getenv("EDSM_USER"), token=os.getenv(key="EDSM_TOKEN")):
     req = requests.get(
         'https://www.edsm.net/api-logs-v1/get-position',
         params=dict(
-            commanderName=commandername,
+            commanderName=commander_name,
             apiKey=token,
             showCoordinates=1)
         )
@@ -21,9 +21,31 @@ def get_commander_position(commandername, token):
     else:
         return {}
 
-def get_api_discarded():
-    req = requests.get('https://www.edsm.net/api-journal-v1/discard')
+edsm_discard = {}
+
+def post_journal_item(journal_item, commander_name=os.getenv("EDSM_USER"), token=os.getenv(key="EDSM_TOKEN"), software_info={
+                    "fromSoftware":"EDCompanion",
+                    "fromSoftwareVersion":"1.0",
+                    "fromGameVersion":"4.0.0.1809",
+                    "fromGameBuild":"r305601/r0 ",
+                }):
+    if journal_item.get('event') in edsm_discard or "fromGameVersion" not in software_info:
+        return {}
+
+    time.sleep(0.1)
+    post_body = dict(
+                commanderName=commander_name,
+                apiKey=token,
+                **software_info,
+                message=journal_item
+            )
+
+    req = requests.post(
+        'https://www.edsm.net/api-journal-v1/',
+        json=post_body
+    )
     if req.status_code == 200:
+        #text = req.text
         record = req.json()
         return record if record else {}
     else:
@@ -145,3 +167,144 @@ def get_systems_in_sphere(system, radius=100):
         return req.json()
     else:
         return {}
+
+
+edsm_discard = set([
+  "ShutDown",
+  "EDDItemSet",
+  "EDDCommodityPrices",
+  "ModuleArrived",
+  "ShipArrived",
+  "Coriolis",
+  "EDShipyard",
+  "Market",
+  "Shipyard",
+  "Outfitting",
+  "ModuleInfo",
+  "Status",
+  "SquadronCreated",
+  "SquadronStartup",
+  "DisbandedSquadron",
+  "InvitedToSquadron",
+  "AppliedToSquadron",
+  "JoinedSquadron",
+  "LeftSquadron",
+  "SharedBookmarkToSquadron",
+  "CarrierStats",
+  "CarrierTradeOrder",
+  "CarrierFinance",
+  "CarrierBankTransfer",
+  "CarrierCrewServices",
+  "CarrierJumpRequest",
+  "CarrierJumpCancelled",
+  "CarrierDepositFuel",
+  "CarrierDockingPermission",
+  "CarrierModulePack",
+  "CarrierBuy",
+  "CarrierNameChange",
+  "CarrierDecommission",
+  "BookDropship",
+  "CancelDropship",
+  "DropshipDeploy",
+  "CollectItems",
+  "DropItems",
+  "Disembark",
+  "Embark",
+  "Fileheader",
+  "Commander",
+  "NewCommander",
+  "ClearSavedGame",
+  "Music",
+  "Continued",
+  "Passengers",
+  "DockingCancelled",
+  "DockingDenied",
+  "DockingGranted",
+  "DockingRequested",
+  "DockingTimeout",
+  "StartJump",
+  "Touchdown",
+  "Liftoff",
+  "NavBeaconScan",
+  "SupercruiseEntry",
+  "SupercruiseExit",
+  "NavRoute",
+  "NavRouteClear",
+  "PVPKill",
+  "CrimeVictim",
+  "UnderAttack",
+  "ShipTargeted",
+  "Scanned",
+  "DataScanned",
+  "DatalinkScan",
+  "EngineerApply",
+  "EngineerLegacyConvert",
+  "FactionKillBond",
+  "Bounty",
+  "CapShipBond",
+  "DatalinkVoucher",
+  "SystemsShutdown",
+  "EscapeInterdiction",
+  "HeatDamage",
+  "HeatWarning",
+  "HullDamage",
+  "ShieldState",
+  "FuelScoop",
+  "LaunchDrone",
+  "AfmuRepairs",
+  "CockpitBreached",
+  "ReservoirReplenished",
+  "CargoTransfer",
+  "ApproachBody",
+  "LeaveBody",
+  "DiscoveryScan",
+  "MaterialDiscovered",
+  "Screenshot",
+  "CrewAssign",
+  "CrewFire",
+  "NpcCrewRank",
+  "ShipyardNew",
+  "StoredModules",
+  "MassModuleStore",
+  "ModuleStore",
+  "ModuleSwap",
+  "SuitLoadout",
+  "SwitchSuitLoadout",
+  "CreateSuitLoadout",
+  "LoadoutEquipModule",
+  "PowerplayVote",
+  "PowerplayVoucher",
+  "ChangeCrewRole",
+  "CrewLaunchFighter",
+  "CrewMemberJoins",
+  "CrewMemberQuits",
+  "CrewMemberRoleChange",
+  "KickCrewMember",
+  "EndCrewSession",
+  "LaunchFighter",
+  "DockFighter",
+  "FighterDestroyed",
+  "FighterRebuilt",
+  "VehicleSwitch",
+  "LaunchSRV",
+  "DockSRV",
+  "SRVDestroyed",
+  "JetConeBoost",
+  "JetConeDamage",
+  "RebootRepair",
+  "RepairDrone",
+  "WingAdd",
+  "WingInvite",
+  "WingJoin",
+  "WingLeave",
+  "ReceiveText",
+  "SendText",
+  "Shutdown",
+  "FSSSignalDiscovered",
+  "AsteroidCracked",
+  "ProspectedAsteroid",
+  "ScanBaryCentre",
+  "FSSBodySignals",
+  "SAASignalsFound",
+  "ScanOrganic"
+])

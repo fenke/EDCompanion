@@ -131,12 +131,16 @@ receiver_app = falcon.asgi.App(
         RouteTimer(),
         RequiredMediaTypes()])
 
-def append_event_writer(journal, event):
+def file_event_writer(journal, event):
     with open(journal['journal_path'], "a", encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
 
+async def pgsql_event_writer(journal, event):
+    pass
+
 class EventReceiverEndpoint(object):
-    """ Handles sink events """
+    """ Handles incoming event messages """
+    
     def __init__(self, **kwargs):
         self.pgsql_params = dict(
             dsn=kwargs.get('dsn', os.getenv("PGSQL_URL")),
@@ -146,7 +150,7 @@ class EventReceiverEndpoint(object):
         self.journals = {}
         self.logpath = os.path.abspath(os.path.join('journals'))
         print(f"Logpath: {self.logpath}")
-        self.write_queue = create_threaded_worker(append_event_writer)
+        self.write_queue = create_threaded_worker(file_event_writer)
 
     async def on_post(self, req, resp):
         """Writes ED journal events
@@ -165,12 +169,15 @@ class EventReceiverEndpoint(object):
                 return
 
             journal_id = self.regex_alphanum.sub('_', str(req.get_param("journal_id", default='')))
+            journal_id = str(uuid.UUID(journal_id))
+
             if not journal_id:
                 data = await req.stream.read()
-                journal_id = hashlib.md5(data).hexdigest()
+                journal_name = self.regex_alphanum.sub('_', str(req.get_param("filename")))
+                journal_id = hashlib.md5(data).update(io.BytesIO(journal_name.encode('utf-8'))).hexdigest()
                 events = json.loads(data.decode('utf-8'))
                 self.journals[journal_id] = dict(
-                    journal_name = self.regex_alphanum.sub('_', str(req.get_param("filename"))),
+                    journal_name = journal_name,
                     last_event_time = make_datetime(events[1].get("timestamp")),
                     player_id = self.regex_alphanum.sub('_', str(events[1].get('FID'))),
                     header = events
@@ -179,7 +186,6 @@ class EventReceiverEndpoint(object):
 
             else:
                 syslog.info(f"Using journal_id {journal_id}")
-                journal_id = str(uuid.UUID(journal_id))
 
             journal = self.journals[journal_id]
             last_event_time = journal.get('last_event_time')
@@ -218,7 +224,7 @@ class EventReceiverEndpoint(object):
                 resp.data = outfile.read()
             
         except Exception as e:
-            syslog.exception(f"Failed to process request: {e}")
+            syslog.exception(f"Failed to process request: {e}", exc_info=True)
             raise
 
 receiver_app.add_route('/event', EventReceiverEndpoint())

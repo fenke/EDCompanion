@@ -11,6 +11,7 @@ import datetime
 import ntpath
 from functools import reduce
 
+syslog = logging.getLogger(f"root.{__name__}")
 
 def loads_jsonline(line):
     return json.loads(line[0:-2]) if line[-2] == "," else json.loads(line)
@@ -101,3 +102,8 @@ def edc_read_journal(journal, notail=False):
             timestamp=datetime.datetime.utcnow().isoformat(),
             filename=f"{ntpath.basename(journal)}"
         )
+
+# 
+
+# Database ===========================================
+

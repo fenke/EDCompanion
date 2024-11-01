@@ -1,7 +1,7 @@
 #pylint: disable=missing-module-docstring
 #pylint: disable=missing-function-docstring
 
-import math
+import math, re
 import typing
 import logging
 import urllib.parse
@@ -12,6 +12,10 @@ import pandas as pd
 from edcompanion.edsm_api import get_edsm_info
 
 syslog = logging.getLogger("root." + __name__)
+
+regex_alphanum = re.compile('[^-0-9a-zA-Z_]+')
+def safe_alphanum(s):
+    return regex_alphanum.sub('_', s)
 
 class PostgreSQLDataSource(object):
     """
@@ -145,3 +149,85 @@ class PGSQLDataSourceEDDB(PostgreSQLDataSource):
             *[d for c in coordinates for d in [c-side, c+side]],
             *coordinates, distance)
 
+
+class PGSQLQueryParams(typing.NamedTuple):
+    last_param: typing.Callable
+    append_param: typing.Callable   
+    get_params: typing.Callable     
+
+
+def pgsql_query_params(log=None) -> PGSQLQueryParams:
+    sql_params =[]
+    def last_param():
+        return f"${str(len(sql_params))}"
+    def append_param(p):
+        if not p:
+            syslog.warning(f"Appending 'false' parameter of type {type(p)}")
+        sql_params.append(p)
+        return f"${str(len(sql_params))}"
+    def get_params():
+        assert len(sql_params) < 32768, "PostgreSQL does not allow more then 32k bound parameters"
+        return sql_params
+
+    return PGSQLQueryParams(
+        last_param=last_param,
+        append_param=append_param if log is None else lambda p: log(append_param(p)),
+        get_params=get_params
+    )
+
+# SCHEMA"S ========================================
+
+# SYSTEMS
+
+async def create_systems_table(pgpool):
+    await pgpool.execute(f"""
+        CREATE TABLE IF NOT EXISTS systems (
+            id64 BIGINT NOT NULL,
+            x DOUBLE PRECISION  NOT NULL,
+            y DOUBLE PRECISION  NOT NULL,
+            z DOUBLE PRECISION  NOT NULL,
+            name TEXT NOT NULL
+        );
+    """)
+
+async def create_systems_indices(pgpool):
+    await pgpool.execute(f"""
+        CREATE INDEX IF NOT EXISTS systems_x_idx ON systems (x);
+        CREATE INDEX IF NOT EXISTS systems_y_idx ON systems (y);
+        CREATE INDEX IF NOT EXISTS systems_z_idx ON systems (z); 
+        CREATE INDEX IF NOT EXISTS systems_name_idx ON systems (name);
+        CREATE INDEX IF NOT EXISTS systems_id64_idx ON systems (id64);
+    """)
+
+async def remove_duplicate_systems(pgpool):
+    await pgpool.execute("""
+        DELETE FROM systems a
+        WHERE   a.ctid <> (SELECT min(b.ctid)
+                        FROM   systems b
+                        WHERE  a.id64 = b.id64 );"""
+    )
+
+async def create_systems_unique_index(pgpool):
+    await pgpool.execute(f"""
+        DROP INDEX systems_id64_idx ;
+        CREATE UNIQUE INDEX IF NOT EXISTS systems_id64_unique ON eddb.systems (id64);
+    """)
+
+# BODIES
+async def create_bodies_table(pgpool):
+    await pgpool.execute(f"""
+        CREATE TABLE IF NOT EXISTS bodies (
+            id64 BIGINT NOT NULL,
+            name TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS bodies_id64_unique ON bodies (id64);
+        CREATE INDEX IF NOT EXISTS bodies_name_idx ON bodies (name);
+    """)
+
+# SIGNALS
+
+# BELTS
+
+
+
+# EOF ============================================

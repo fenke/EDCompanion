@@ -328,7 +328,7 @@ def follow_journal(backlog=0, verbose=False):
             }
         )
 
-        def send_event(event):
+        def send_event_edsm(event):
             nonlocal edsm_last_activity, edsm_params
 
             if not edsm_last_activity:
@@ -341,7 +341,7 @@ def follow_journal(backlog=0, verbose=False):
             if response and response.get('msg') != 'OK':
                 return response
 
-        send_queue = create_threaded_worker(send_event)
+        send_queue = create_threaded_worker(send_event_edsm)
         send_queue.start()
 
         # ----------------------------------------------------------

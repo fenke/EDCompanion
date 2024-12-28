@@ -7,6 +7,7 @@ import psutil
 import json
 import re
 import uuid
+import asyncpg
 import hashlib
 import uvicorn
 import falcon
@@ -14,8 +15,6 @@ import falcon.asgi
 from falcon.errors import HTTPInternalServerError
 
 from edcompanion.timetools import make_datetime, make_naive_utc
-from edcompanion.threadworker import create_threaded_worker
-
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d \t%(threadName)s\t%(name)s\t%(lineno)d\t%(levelname)s\t%(message)s",
@@ -131,11 +130,8 @@ receiver_app = falcon.asgi.App(
         RouteTimer(),
         RequiredMediaTypes()])
 
-def file_event_writer(journal, event):
-    with open(journal['journal_path'], "a", encoding="utf-8") as f:
-        f.write(json.dumps(event) + "\n")
 
-async def pgsql_event_writer(journal, event):
+async def pgsql_event_writer(journal_id, event):
     pass
 
 class EventReceiverEndpoint(object):
@@ -147,10 +143,46 @@ class EventReceiverEndpoint(object):
             server_settings={'search_path': "eddb"}
         )
         self.regex_alphanum = re.compile('[^-.0-9a-zA-Z_]+')
-        self.journals = {}
-        self.logpath = os.path.abspath(os.path.join('journals'))
-        print(f"Logpath: {self.logpath}")
-        self.write_queue = create_threaded_worker(file_event_writer)
+
+        self.pgsql_params = dict(
+            dsn=os.getenv("PGSQL_URL"),
+            server_settings={'search_path': "eddb"}
+        )
+        self.pool = None
+
+    async def get_pool(self):
+        if not self.pool:
+            self.pool = await asyncpg.create_pool(**self.pgsql_params)
+
+            await self.pool.execute(f"""
+                CREATE TABLE IF NOT EXISTS journals (
+                    id UUID NOT NULL,
+                    name TEXT NOT NULL,
+                    commander_id TEXT,
+                    commander_name TEXT,
+                    timestamp TIMESTAMPTZ 
+                );
+            """) # commander_id = $2, commander_name = $3, timestamp = $4
+            await self.pool.execute(f"""
+                CREATE TABLE IF NOT EXISTS journal_events (
+                    journal_id UUID NOT NULL,
+                    event_hash TEXT NOT NULL,
+                    event_time TIMESTAMPTZ NOT NULL,
+                    event_name TEXT NOT NULL,
+                    event_data JSON
+                );
+            """) # commander_id = $2, commander_name = $3, timestamp = $4
+
+            await self.pool.execute(f"""
+                CREATE UNIQUE INDEX IF NOT EXISTS journal_id_idx ON eddb.journals (id);
+                CREATE INDEX IF NOT EXISTS journals_name_idx ON eddb.journals (name);
+                CREATE INDEX IF NOT EXISTS journal_events_journal_id_idx ON eddb.journal_events (journal_id); 
+                CREATE INDEX IF NOT EXISTS journal_events_event_name_idx ON eddb.journal_events (event_name);
+                CREATE INDEX IF NOT EXISTS jounal_events_event_time_idx ON eddb.journal_events (event_time);
+                CREATE UNIQUE INDEX IF NOT EXISTS journal_events_event_hash_idx ON eddb.journal_events (event_hash);
+            """)
+        return self.pool
+    
 
     async def on_post(self, req, resp):
         """Writes ED journal events
@@ -168,60 +200,62 @@ class EventReceiverEndpoint(object):
             if req.content_type != "application/json":
                 return
 
-            journal_id = self.regex_alphanum.sub('_', str(req.get_param("journal_id", default='')))
-            journal_id = str(uuid.UUID(journal_id))
+            data = await req.stream.read()
+            events = json.loads(data.decode('utf-8'))
+            if not isinstance(events, list):
+                events = [events]
 
-            if not journal_id:
-                data = await req.stream.read()
-                journal_name = self.regex_alphanum.sub('_', str(req.get_param("filename")))
-                journal_id = hashlib.md5(data).update(io.BytesIO(journal_name.encode('utf-8'))).hexdigest()
-                events = json.loads(data.decode('utf-8'))
-                self.journals[journal_id] = dict(
-                    journal_name = journal_name,
-                    last_event_time = make_datetime(events[1].get("timestamp")),
-                    player_id = self.regex_alphanum.sub('_', str(events[1].get('FID'))),
-                    header = events
-                )
-                journal['journal_path'] = os.path.join(self.logpath, str(journal['player_id']), journal['journal_name'])
+            pool = await self.get_pool()
+            journal_id = req.get_param("journal_id")
+            journal_name = req.get_param("journal_name")
+            for event in events:
 
-            else:
-                syslog.info(f"Using journal_id {journal_id}")
+                event_hash=hashlib.md5(json.dumps(event, sort_keys=True).encode('utf-8')).hexdigest()
+                timestamp = make_datetime(event.pop("timestamp"))
+                event_name = event.pop('event')
+                
+                if event_name == 'Commander':
+                    # now we can make the journal entry
 
-            journal = self.journals[journal_id]
-            last_event_time = journal.get('last_event_time')
+                    cmdr_id = event.get('FID')
+                    record = await pool.fetch("SELECT id FROM journals WHERE name = $1 and commander_id = $2", journal_name, cmdr_id)
+                    if not record:
+                        journal_id = uuid.uuid4()
+                        await pool.execute(
+                                """INSERT INTO journals (id, name, commander_id)
+                                    VALUES ($1, $2, $3) 
+                                    ON CONFLICT DO NOTHING
+                                """, journal_id, journal_name, cmdr_id
+                        )
+                    else:
+                        journal_id = uuid.UUID( str(record[0].get('id')) )
+                        syslog.info(f"Found journal {journal_name} for {cmdr_id} with id {journal_id}")
+
+                    await pool.execute(
+                            """update journals
+                                SET commander_name = $2, timestamp = $3
+                                WHERE id = $1
+                            """, journal_id, event.get('Name'), timestamp
+                    )
+                    
+                else:
+                    jid_param = req.get_param("journal_id")
+                    if  jid_param:
+                        journal_id = uuid.UUID(str(jid_param))
 
 
-            event = json.loads((await req.stream.read()).decode('utf-8'))
-            timestamp = make_datetime(event.get("timestamp"))
-            if timestamp < last_event_time:
-                return
-            
-            event_name = event.get('event')
-
-            if event_name == 'Fileheader':
-                journal['header'].append(event)
-
-            elif event_name == 'Commander':
-
-                journal['header'].append(event)
-                journal['player_id'] = self.regex_alphanum.sub('_', str(event.get('FID')))
-                journal['journal_path'] = os.path.join(self.logpath, str(journal['player_id']), journal['journal_name'])
-
-                print(f"Journal path: {journal['journal_path']}")
-                os.makedirs(os.path.join(self.logpath, str(journal['player_id'])), exist_ok=True)
-                with open(os.path.join(journal['journal_path']), "w", encoding="utf-8") as f:
-                    f.writelines(journal['header'])
-                    journal['headers'] = []
-
-            else:
-                self.write_queue.put(journal, event)
+                if journal_id:
+                    await pool.execute(
+                            """INSERT INTO journal_events (journal_id, event_time, event_name, event_hash, event_data)
+                                VALUES ($1, $2, $3, $4, $5)
+                                ON CONFLICT DO NOTHING
+                            """, journal_id, timestamp, event_name, event_hash, json.dumps(event)
+                    )
 
             resp.content_type = "application/json"
-            with io.BytesIO() as outfile:
-                outfile.write(json.dumps(dict(journal_id=journal_id)).encode('utf-8'))
-
-                outfile.seek(0)
-                resp.data = outfile.read()
+            resp.text = json.dumps({
+                "journal_id": str(journal_id)
+            }).encode('utf-8') if journal_id else json.dumps({}).encode('utf-8')
             
         except Exception as e:
             syslog.exception(f"Failed to process request: {e}", exc_info=True)

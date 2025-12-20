@@ -72,7 +72,7 @@ def create_threaded_worker(workerfunc, **put_kwargs):
                 if item:
                     try:
                         result = workerfunc(*item[0], **item[1])
-                        if not result is None:
+                        if result is not None:
                             done_queue.put_nowait(result)
 
                     except queue.Full:

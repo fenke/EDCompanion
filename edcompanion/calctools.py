@@ -42,3 +42,31 @@ def line_from_points(points):
         support = support,
     )
 
+def create_get_bits_func(bits, offset):
+    mask=(2**bits)-1
+    shift_right = (64 - offset) - bits
+    def get_bits(val):
+        return (val  >> shift_right) & mask
+    return get_bits
+
+id64_layout = {
+    'sector_id': (41, 0),
+    'sector_x': (14, 0),
+    'sector_y': (13, 14),
+    'sector_z': (14, 27),
+    'cube_layer': (3, 41),
+    'system_number': (11, 44),
+    'body_number': (9, 55),
+}
+
+convert_id64_mappiing = {
+    k: create_get_bits_func(*f)
+    for k, f in id64_layout.items()
+}
+
+
+def split_id64(id64):
+    return {
+        k: f(id64)
+        for k, f in convert_id64_mappiing.items()
+    }

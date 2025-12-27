@@ -2,108 +2,108 @@
    "markers": [
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 9.6\ncentre \t[1005.33 -147.62 -112.81]\nprojected \t[1005.8 -157.1 -114.5]",
-         "x": 1005.8,
-         "y": -157.1,
-         "z": -114.5
+         "text": "cluster 0, distance 15.4\ncentre \t[1005.33 -147.62 -112.81]\nprojected \t[1006.3 -157.7 -124.4]",
+         "x": 1006.3,
+         "y": -157.7,
+         "z": -124.4
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 496.6\ncentre \t[8655.06 -153.22 2682.14]\nprojected \t[8796.3 -193.3 2207.7]",
-         "x": 8796.3,
-         "y": -193.3,
-         "z": 2207.7
+         "text": "cluster 0, distance 1717.3\ncentre \t[8655.06 -153.22 2682.14]\nprojected \t[ 8612.3 -1594.9  1750.1]",
+         "x": 8612.3,
+         "y": -1594.9,
+         "z": 1750.1
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 278.1\ncentre \t[1112.86 -210.37  202.45]\nprojected \t[1191.1 -157.9  -59.3]",
-         "x": 1191.1,
-         "y": -157.9,
-         "z": -59.3
+         "text": "cluster 0, distance 292.5\ncentre \t[1112.86 -210.37  202.45]\nprojected \t[1186.  -191.7  -80.1]",
+         "x": 1186.0,
+         "y": -191.7,
+         "z": -80.1
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 353.4\ncentre \t[14583.05  -238.23  3564.39]\nprojected \t[14482.3  -219.7  3902.6]",
-         "x": 14482.3,
-         "y": -219.7,
-         "z": 3902.6
+         "text": "cluster 0, distance 2481.3\ncentre \t[14583.05  -238.23  3564.39]\nprojected \t[14231.9 -2656.8  3135. ]",
+         "x": 14231.9,
+         "y": -2656.8,
+         "z": 3135.0
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 354.2\ncentre \t[1052.33 -376.14 -390.98]\nprojected \t[ 973.8 -156.9 -124. ]",
-         "x": 973.8,
-         "y": -156.9,
-         "z": -124.0
+         "text": "cluster 0, distance 347.1\ncentre \t[1052.33 -376.14 -390.98]\nprojected \t[1026.  -161.5 -119.5]",
+         "x": 1026.0,
+         "y": -161.5,
+         "z": -119.5
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 431.2\ncentre \t[-5492.12  -552.05 10505.1 ]\nprojected \t[-5232.6  -549.8 10160.8]",
-         "x": -5232.6,
-         "y": -549.8,
-         "z": 10160.8
+         "text": "cluster 1, distance 139.9\ncentre \t[-5492.12  -552.05 10505.1 ]\nprojected \t[-5431.2  -487.1 10397.2]",
+         "x": -5431.2,
+         "y": -487.1,
+         "z": 10397.2
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 703.5\ncentre \t[-9301.2   -413.83  7933.68]\nprojected \t[-8894.5  -625.5  7400.1]",
-         "x": -8894.5,
-         "y": -625.5,
-         "z": 7400.1
+         "text": "cluster 1, distance 271.7\ncentre \t[-9301.2   -413.83  7933.68]\nprojected \t[-9433.2  -431.6  8170.5]",
+         "x": -9433.2,
+         "y": -431.6,
+         "z": 8170.5
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 2285.3\ncentre \t[ 4954.17   159.51 20640.97]\nprojected \t[ 6306.5  -311.4 18860. ]",
-         "x": 6306.5,
-         "y": -311.4,
-         "z": 18860.0
+         "text": "cluster 1, distance 3986.6\ncentre \t[ 4954.17   159.51 20640.97]\nprojected \t[ 6842.7  -657.4 17226.4]",
+         "x": 6842.7,
+         "y": -657.4,
+         "z": 17226.4
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 2169.7\ncentre \t[ 1221.35  -697.35 12327.86]\nprojected \t[  -79.1  -443.4 14045.9]",
-         "x": -79.1,
-         "y": -443.4,
-         "z": 14045.9
+         "text": "cluster 1, distance 1552.7\ncentre \t[ 1221.35  -697.35 12327.86]\nprojected \t[  470.3  -569.  13680.8]",
+         "x": 470.3,
+         "y": -569.0,
+         "z": 13680.8
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 143.3\ncentre \t[ -871.4   -591.77 13516.4 ]\nprojected \t[ -840.6  -459.1 13471.9]",
-         "x": -840.6,
-         "y": -459.1,
-         "z": 13471.9
+         "text": "cluster 1, distance 510.1\ncentre \t[ -871.4   -591.77 13516.4 ]\nprojected \t[ -623.7  -553.8 13072.1]",
+         "x": -623.7,
+         "y": -553.8,
+         "z": 13072.1
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 311.8\ncentre \t[ -623.71  -554.08 13263.77]\nprojected \t[ -803.6  -458.3 13499.8]",
-         "x": -803.6,
-         "y": -458.3,
-         "z": 13499.8
+         "text": "cluster 1, distance 167.5\ncentre \t[ -623.71  -554.08 13263.77]\nprojected \t[ -542.3  -554.9 13117.4]",
+         "x": -542.3,
+         "y": -554.9,
+         "z": 13117.4
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 238.9\ncentre \t[ -671.75  -321.67 13353.5 ]\nprojected \t[ -788.   -458.  13511.5]",
-         "x": -788.0,
-         "y": -458.0,
-         "z": 13511.5
+         "text": "cluster 1, distance 356.3\ncentre \t[ -671.75  -321.67 13353.5 ]\nprojected \t[ -543.3  -554.9 13116.8]",
+         "x": -543.3,
+         "y": -554.9,
+         "z": 13116.8
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 156.0\ncentre \t[-1016.32  -559.56 13184.65]\nprojected \t[-1092.   -464.3 13282.4]",
-         "x": -1092.0,
-         "y": -464.3,
-         "z": 13282.4
+         "text": "cluster 1, distance 289.4\ncentre \t[-1016.32  -559.56 13184.65]\nprojected \t[ -875.6  -550.3 12932. ]",
+         "x": -875.6,
+         "y": -550.3,
+         "z": 12932.0
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 123.2\ncentre \t[-1123.76  -397.15 13388.27]\nprojected \t[-1060.5  -463.6 13306.1]",
-         "x": -1060.5,
-         "y": -463.6,
-         "z": 13306.1
+         "text": "cluster 1, distance 541.5\ncentre \t[-1123.76  -397.15 13388.27]\nprojected \t[ -872.8  -550.4 12933.5]",
+         "x": -872.8,
+         "y": -550.4,
+         "z": 12933.5
       },
       {
          "pin": "yellow",
-         "text": "cluster 1, distance 147.6\ncentre \t[ -898.55  -315.94 13391.51]\nprojected \t[ -914.3  -460.6 13416.3]",
-         "x": -914.3,
-         "y": -460.6,
-         "z": 13416.3
+         "text": "cluster 1, distance 475.9\ncentre \t[ -898.55  -315.94 13391.51]\nprojected \t[ -700.4  -552.7 13029.4]",
+         "x": -700.4,
+         "y": -552.7,
+         "z": 13029.4
       }
    ]
 }

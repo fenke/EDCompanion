@@ -2,38 +2,38 @@
    "markers": [
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 15.4\ncentre \t[1005.33 -147.62 -112.81]\nprojected \t[1006.3 -157.7 -124.4]",
-         "x": 1006.3,
-         "y": -157.7,
-         "z": -124.4
+         "text": "cluster 0, distance 9.6\ncentre \t[1005.33 -147.62 -112.81]\nprojected \t[1005.8 -157.1 -114.5]",
+         "x": 1005.8,
+         "y": -157.1,
+         "z": -114.5
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 1717.3\ncentre \t[8655.06 -153.22 2682.14]\nprojected \t[ 8612.3 -1594.9  1750.1]",
-         "x": 8612.3,
-         "y": -1594.9,
-         "z": 1750.1
+         "text": "cluster 0, distance 496.6\ncentre \t[8655.06 -153.22 2682.14]\nprojected \t[8796.3 -193.3 2207.7]",
+         "x": 8796.3,
+         "y": -193.3,
+         "z": 2207.7
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 292.5\ncentre \t[1112.86 -210.37  202.45]\nprojected \t[1186.  -191.7  -80.1]",
-         "x": 1186.0,
-         "y": -191.7,
-         "z": -80.1
+         "text": "cluster 0, distance 278.1\ncentre \t[1112.86 -210.37  202.45]\nprojected \t[1191.1 -157.9  -59.3]",
+         "x": 1191.1,
+         "y": -157.9,
+         "z": -59.3
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 2481.3\ncentre \t[14583.05  -238.23  3564.39]\nprojected \t[14231.9 -2656.8  3135. ]",
-         "x": 14231.9,
-         "y": -2656.8,
-         "z": 3135.0
+         "text": "cluster 0, distance 353.4\ncentre \t[14583.05  -238.23  3564.39]\nprojected \t[14482.3  -219.7  3902.6]",
+         "x": 14482.3,
+         "y": -219.7,
+         "z": 3902.6
       },
       {
          "pin": "yellow",
-         "text": "cluster 0, distance 347.1\ncentre \t[1052.33 -376.14 -390.98]\nprojected \t[1026.  -161.5 -119.5]",
-         "x": 1026.0,
-         "y": -161.5,
-         "z": -119.5
+         "text": "cluster 0, distance 354.2\ncentre \t[1052.33 -376.14 -390.98]\nprojected \t[ 973.8 -156.9 -124. ]",
+         "x": 973.8,
+         "y": -156.9,
+         "z": -124.0
       },
       {
          "pin": "yellow",
